@@ -27,12 +27,6 @@
     .topbar-content {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-    }
-
-    .top-left {
-      display: flex;
-      align-items: center;
       gap: 15px;
     }
 
@@ -46,21 +40,6 @@
       color: white;
       font-size: 24px;
       font-weight: 700;
-    }
-
-    .btn-olho {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      border: none;
-      background: white;
-      cursor: pointer;
-      font-size: 18px;
-    }
-
-    .btn-olho.ativo {
-      background: #16a34a;
-      color: white;
     }
 
     .container {
@@ -140,12 +119,8 @@
 
   <div class="topbar">
     <div class="topbar-content">
-      <div class="top-left">
-        <img src="https://i.ibb.co/YF0MfYXS/Logo-RBT-Perfil.jpg" class="logo">
-        <span class="titulo">Monitoramento - Metas equipes externa</span>
-      </div>
-
-      <button class="btn-olho" onclick="toggleOcultar(this)">👁️</button>
+      <img src="https://i.ibb.co/YF0MfYXS/Logo-RBT-Perfil.jpg" class="logo">
+      <span class="titulo">Monitoramento - Metas equipes externa</span>
     </div>
   </div>
 
@@ -177,7 +152,6 @@
 let dadosTecnicos = {};
 let tipoOrdenacao = null;
 let direcao = "desc";
-let ocultarBaixos = false;
 
 document.getElementById('upload').addEventListener('change', handleFile);
 
@@ -197,12 +171,16 @@ function handleFile(e) {
 
       rows.forEach((row, i) => {
         if (i === 0) return;
+
         const nome = row[0];
         const total = row[19];
 
         if (!nome) return;
 
-        if (!dadosTecnicos[nome]) dadosTecnicos[nome] = [0,0,0];
+        if (!dadosTecnicos[nome]) {
+          dadosTecnicos[nome] = [0, 0, 0];
+        }
+
         dadosTecnicos[nome][index] = Number(total) || 0;
       });
     });
@@ -211,6 +189,10 @@ function handleFile(e) {
   };
 
   reader.readAsArrayBuffer(file);
+}
+
+function media(arr){
+  return arr.reduce((a,b)=>a+b,0)/arr.length;
 }
 
 function contarMetas(meses){
@@ -225,12 +207,14 @@ function renderTabela() {
 
   if (tipoOrdenacao !== null) {
     lista.sort((a, b) => {
-      let valA, valB;
 
       if (tipoOrdenacao === "media") {
-        valA = media(dadosTecnicos[a]);
-        valB = media(dadosTecnicos[b]);
-      } else if (tipoOrdenacao === "status") {
+        return direcao === "desc"
+          ? media(dadosTecnicos[b]) - media(dadosTecnicos[a])
+          : media(dadosTecnicos[a]) - media(dadosTecnicos[b]);
+      }
+
+      if (tipoOrdenacao === "status") {
         let metasA = contarMetas(dadosTecnicos[a]);
         let metasB = contarMetas(dadosTecnicos[b]);
 
@@ -238,27 +222,28 @@ function renderTabela() {
           return direcao === "desc" ? metasB - metasA : metasA - metasB;
         }
 
-        return direcao === "desc" ? media(dadosTecnicos[b]) - media(dadosTecnicos[a])
-                                 : media(dadosTecnicos[a]) - media(dadosTecnicos[b]);
-      } else {
-        valA = dadosTecnicos[a][tipoOrdenacao];
-        valB = dadosTecnicos[b][tipoOrdenacao];
+        return direcao === "desc"
+          ? media(dadosTecnicos[b]) - media(dadosTecnicos[a])
+          : media(dadosTecnicos[a]) - media(dadosTecnicos[b]);
       }
 
-      return direcao === "desc" ? valB - valA : valA - valB;
+      return direcao === "desc"
+        ? dadosTecnicos[b][tipoOrdenacao] - dadosTecnicos[a][tipoOrdenacao]
+        : dadosTecnicos[a][tipoOrdenacao] - dadosTecnicos[b][tipoOrdenacao];
     });
   }
 
   lista.forEach(nome => {
+
     let meses = dadosTecnicos[nome];
     let m = media(meses);
 
-    if (ocultarBaixos && m < 50) return;
+    if (m < 50) return; // 🔥 REGRA DE OCULTAR
 
     let linha = `<tr><td><strong>${nome}</strong></td>`;
 
-    meses.forEach(v => {
-      linha += `<td class="${v >= 170 ? 'meta-ok':'meta-bad'}">${v}</td>`;
+    meses.forEach(valor => {
+      linha += `<td class="${valor >= 170 ? 'meta-ok' : 'meta-bad'}">${valor}</td>`;
     });
 
     linha += `<td>${m.toFixed(1)}</td>`;
@@ -271,10 +256,6 @@ function renderTabela() {
     linha += `<td>${status}</td></tr>`;
     tbody.innerHTML += linha;
   });
-}
-
-function media(arr){
-  return arr.reduce((a,b)=>a+b,0)/arr.length;
 }
 
 function ordenarMes(i,btn){
@@ -298,12 +279,6 @@ function ordenarStatus(btn){
 function atualizarIcones(btn){
   document.querySelectorAll(".btn-sort").forEach(b=>b.textContent="↓");
   btn.textContent = direcao==="desc"?"↓":"↑";
-}
-
-function toggleOcultar(btn){
-  ocultarBaixos = !ocultarBaixos;
-  btn.classList.toggle("ativo");
-  renderTabela();
 }
 </script>
 
