@@ -13,10 +13,7 @@ body {
   padding:20px;
 }
 
-.container {
-  max-width:1200px;
-  margin:auto;
-}
+.container { max-width:1200px; margin:auto; }
 
 /* TOPO */
 .topbar {
@@ -27,18 +24,55 @@ body {
 }
 
 .topbar-content {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display:flex;
+  align-items:center;
+  gap:12px;
 }
 
-/* ✅ LOGO SEM BORDA */
-.logo {
-  height: 45px;
-  object-fit: contain;
+.logo { height:45px; }
+
+/* KPIs */
+.cards {
+  display:grid;
+  grid-template-columns: repeat(3,1fr);
+  gap:15px;
+  margin-top:20px;
 }
 
-/* CARD */
+.card-kpi {
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  box-shadow:0 4px 10px #0001;
+}
+
+.card-kpi span {
+  font-size:32px;
+  font-weight:bold;
+}
+
+/* TOP 3 */
+.top3 { display:flex; gap:15px; margin-top:20px; }
+
+.top3-card {
+  flex:1;
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  text-align:center;
+  box-shadow:0 4px 10px #0001;
+}
+
+.gold { border-top:5px solid #facc15; }
+.silver { border-top:5px solid #9ca3af; }
+.bronze { border-top:5px solid #b45309; }
+
+/* TABELA */
 .card {
   background:white;
   padding:20px;
@@ -46,11 +80,7 @@ body {
   margin-top:20px;
 }
 
-/* TABELA */
-table {
-  width:100%;
-  border-collapse:collapse;
-}
+table { width:100%; border-collapse:collapse; }
 
 th,td {
   padding:10px;
@@ -58,21 +88,21 @@ th,td {
   text-align:center;
 }
 
-th:first-child,td:first-child {
-  text-align:left;
-}
+th:first-child,td:first-child { text-align:left; }
 
-.meta-ok{color:green;}
-.meta-bad{color:red;}
+tr:hover { background:#f9fafb; }
+
+.meta-ok{color:#16a34a;font-weight:bold;}
+.meta-bad{color:#dc2626;}
 
 .circulo{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  width:30px;
-  height:30px;
+  width:28px;
+  height:28px;
   border-radius:50%;
-  font-size:10px;
+  font-size:9px;
   color:white;
   margin-right:3px;
 }
@@ -80,10 +110,7 @@ th:first-child,td:first-child {
 .verde{background:#16a34a;}
 .vermelho{background:#dc2626;}
 
-.btn-sort {
-  cursor:pointer;
-  margin-left:5px;
-}
+.btn-sort { cursor:pointer; margin-left:5px; }
 
 .btn-filtro {
   background:#dc2626;
@@ -91,65 +118,7 @@ th:first-child,td:first-child {
   border:none;
   padding:6px 12px;
   border-radius:8px;
-  font-weight:600;
   cursor:pointer;
-}
-
-.btn-filtro:hover {
-  background:#b91c1c;
-}
-
-/* MODAL */
-.modal{
-  display:none;
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:#0005;
-  justify-content:center;
-  align-items:center;
-}
-
-.modal-content{
-  background:white;
-  border-radius:12px;
-  width:300px;
-  max-height:400px;
-  display:flex;
-  flex-direction:column;
-}
-
-.modal-header{
-  position:sticky;
-  top:0;
-  background:white;
-  padding:10px;
-  border-bottom:1px solid #eee;
-  display:flex;
-  justify-content:space-between;
-}
-
-.lista-scroll{
-  overflow-y:auto;
-  padding:10px;
-}
-
-.btn-aplicar {
-  background:#16a34a;
-  color:white;
-  border:none;
-  padding:6px 10px;
-  border-radius:6px;
-}
-
-.btn-limpar {
-  background:#dc2626;
-  color:white;
-  border:none;
-  padding:6px 10px;
-  border-radius:6px;
 }
 </style>
 </head>
@@ -165,49 +134,49 @@ th:first-child,td:first-child {
   </div>
 </div>
 
+<!-- KPIs -->
+<div class="cards">
+  <div class="card-kpi">
+    <h3>Total Técnicos</h3>
+    <span id="totalTec">0</span>
+  </div>
+  <div class="card-kpi">
+    <h3>Média Geral</h3>
+    <span id="mediaGeral">0</span>
+  </div>
+  <div class="card-kpi">
+    <h3>Meta Batida (%)</h3>
+    <span id="metaPercent">0%</span>
+  </div>
+</div>
+
+<!-- TOP 3 -->
+<div class="top3" id="top3"></div>
+
 <div class="card">
-<table id="tabela">
+<table>
 <thead>
 <tr>
-<th>Técnico <button class="btn-filtro" onclick="abrirFiltro()">🔍 Filtrar</button></th>
-<th>Jan <button class="btn-sort" onclick="ordenarMes(0)">⇅</button></th>
-<th>Fev <button class="btn-sort" onclick="ordenarMes(1)">⇅</button></th>
-<th>Mar <button class="btn-sort" onclick="ordenarMes(2)">⇅</button></th>
-<th>Média <button class="btn-sort" onclick="ordenarMedia()">⇅</button></th>
-<th>Status <button class="btn-sort" onclick="ordenarStatus()">⇅</button></th>
+<th>Técnico <button class="btn-filtro" onclick="abrirFiltro()">Filtrar</button></th>
+<th>Jan <span class="btn-sort" onclick="ordenarMes(0)">⇅</span></th>
+<th>Fev <span class="btn-sort" onclick="ordenarMes(1)">⇅</span></th>
+<th>Mar <span class="btn-sort" onclick="ordenarMes(2)">⇅</span></th>
+<th>Média <span class="btn-sort" onclick="ordenarMedia()">⇅</span></th>
+<th>Status <span class="btn-sort" onclick="ordenarStatus()">⇅</span></th>
 </tr>
 </thead>
-<tbody></tbody>
+<tbody id="tbody"></tbody>
 </table>
 </div>
 
 </div>
 
-<!-- MODAL -->
-<div id="modal" class="modal">
-  <div class="modal-content">
-    
-    <div class="modal-header">
-      <button class="btn-aplicar" onclick="aplicarFiltro()">Aplicar</button>
-      <button class="btn-limpar" onclick="limparFiltro()">Limpar</button>
-    </div>
-
-    <div id="lista" class="lista-scroll"></div>
-
-  </div>
-</div>
-
 <script>
 let dadosTecnicos = {};
 let listaOrdenada = [];
-let nomesFiltrados = [];
 let direcao = "desc";
 
-const abas = [
-  "1836732217",
-  "576248296",
-  "1758926410"
-];
+const abas = ["1836732217","576248296","1758926410"];
 
 async function carregarMes(gid){
   const url = `https://docs.google.com/spreadsheets/d/1KAmeD9jbBX8JssWWeWG3kR03J4zVEjQDx--ojQIFSmg/gviz/tq?tqx=out:json&gid=${gid}`;
@@ -218,107 +187,62 @@ async function carregarMes(gid){
 }
 
 async function carregarDados(){
-  dadosTecnicos = {};
-
   for(let i=0;i<abas.length;i++){
     let rows = await carregarMes(abas[i]);
 
     rows.forEach((r,index)=>{
       if(index===0) return;
-
       let nome = r.c[0]?.v;
       let total = Number(r.c[19]?.v)||0;
 
-      if(!nome) return;
-
-      if(!dadosTecnicos[nome]){
-        dadosTecnicos[nome]=[0,0,0];
-      }
-
+      if(!dadosTecnicos[nome]) dadosTecnicos[nome]=[0,0,0];
       dadosTecnicos[nome][i]=total;
     });
   }
-
   render();
 }
 
 function media(a){ return a.reduce((x,y)=>x+y,0)/a.length; }
 function metas(a){ return a.filter(v=>v>=170).length; }
 
-function render(){
-  let tbody=document.querySelector("tbody");
+function getLista(){
+  return Object.keys(dadosTecnicos).map(n=>{
+    let v=dadosTecnicos[n];
+    return {n,v,m:media(v),k:metas(v)};
+  }).filter(x=>x.m>=50);
+}
+
+function render(lista=null){
+  let tbody=document.getElementById("tbody");
   tbody.innerHTML="";
 
-  Object.keys(dadosTecnicos).forEach(nome=>{
-    let v=dadosTecnicos[nome];
-    let m=media(v);
+  let dados = lista || getLista();
+  dados.sort((a,b)=>b.m-a.m);
 
-    if(m<50) return;
-    if(nomesFiltrados.length && !nomesFiltrados.includes(nome)) return;
+  // KPIs
+  document.getElementById("totalTec").innerText = dados.length;
+  document.getElementById("mediaGeral").innerText = (dados.reduce((s,x)=>s+x.m,0)/dados.length).toFixed(1);
+  document.getElementById("metaPercent").innerText =
+    Math.round((dados.filter(x=>x.m>=170).length/dados.length)*100)+"%";
 
-    let linha=`<tr><td><strong>${nome}</strong></td>`;
+  // TOP 3
+  let top3=document.getElementById("top3");
+  top3.innerHTML="";
+  const estilos=["gold","silver","bronze"];
+  const medalhas=["🥇","🥈","🥉"];
 
-    v.forEach(x=>{
-      linha+=`<td class="${x>=170?'meta-ok':'meta-bad'}">${x}</td>`;
-    });
-
-    linha+=`<td>${m.toFixed(1)}</td>`;
-
-    let s="";
-    ["JAN","FEV","MAR"].forEach((mes,i)=>{
-      s+=`<span class="circulo ${v[i]>=170?'verde':'vermelho'}">${mes}</span>`;
-    });
-
-    linha+=`<td>${s}</td></tr>`;
-    tbody.innerHTML+=linha;
-  });
-}
-
-function ordenarMes(i){
-  direcao = direcao==="desc"?"asc":"desc";
-
-  listaOrdenada = Object.keys(dadosTecnicos).map(n=>{
-    let v=dadosTecnicos[n];
-    return {n,v,m:media(v),k:metas(v)};
+  dados.slice(0,3).forEach((t,i)=>{
+    top3.innerHTML+=`
+      <div class="top3-card ${estilos[i]}">
+        <div>${medalhas[i]}</div>
+        <strong>${t.n}</strong>
+        <span>${t.m.toFixed(1)}</span>
+      </div>`;
   });
 
-  listaOrdenada.sort((a,b)=>direcao==="asc"?a.v[i]-b.v[i]:b.v[i]-a.v[i]);
-  renderOrdenado();
-}
-
-function ordenarMedia(){
-  direcao = direcao==="desc"?"asc":"desc";
-
-  listaOrdenada = Object.keys(dadosTecnicos).map(n=>{
-    let v=dadosTecnicos[n];
-    return {n,v,m:media(v),k:metas(v)};
-  });
-
-  listaOrdenada.sort((a,b)=>direcao==="asc"?a.m-b.m:b.m-a.m);
-  renderOrdenado();
-}
-
-function ordenarStatus(){
-  direcao = direcao==="desc"?"asc":"desc";
-
-  listaOrdenada = Object.keys(dadosTecnicos).map(n=>{
-    let v=dadosTecnicos[n];
-    return {n,v,m:media(v),k:metas(v)};
-  });
-
-  listaOrdenada.sort((a,b)=>direcao==="asc"?a.k-b.k:b.k-a.k);
-  renderOrdenado();
-}
-
-function renderOrdenado(){
-  let tbody=document.querySelector("tbody");
-  tbody.innerHTML="";
-
-  listaOrdenada.forEach(o=>{
-    if(o.m<50) return;
-    if(nomesFiltrados.length && !nomesFiltrados.includes(o.n)) return;
-
-    let linha=`<tr><td><strong>${o.n}</strong></td>`;
+  // TABELA
+  dados.forEach(o=>{
+    let linha=`<tr><td>${o.n}</td>`;
 
     o.v.forEach(x=>{
       linha+=`<td class="${x>=170?'meta-ok':'meta-bad'}">${x}</td>`;
@@ -336,28 +260,26 @@ function renderOrdenado(){
   });
 }
 
-function abrirFiltro(){
-  let lista=document.getElementById("lista");
-  lista.innerHTML="";
-
-  Object.keys(dadosTecnicos).forEach(n=>{
-    lista.innerHTML+=`<div><input type="checkbox" value="${n}"> ${n}</div>`;
-  });
-
-  document.getElementById("modal").style.display="flex";
+/* ORDENAÇÕES */
+function ordenarMes(i){
+  direcao = direcao==="desc"?"asc":"desc";
+  let lista = getLista();
+  lista.sort((a,b)=>direcao==="asc"?a.v[i]-b.v[i]:b.v[i]-a.v[i]);
+  render(lista);
 }
 
-function aplicarFiltro(){
-  let c=document.querySelectorAll("#lista input:checked");
-  nomesFiltrados=[...c].map(x=>x.value);
-  document.getElementById("modal").style.display="none";
-  render();
+function ordenarMedia(){
+  direcao = direcao==="desc"?"asc":"desc";
+  let lista = getLista();
+  lista.sort((a,b)=>direcao==="asc"?a.m-b.m:b.m-a.m);
+  render(lista);
 }
 
-function limparFiltro(){
-  nomesFiltrados=[];
-  document.getElementById("modal").style.display="none";
-  render();
+function ordenarStatus(){
+  direcao = direcao==="desc"?"asc":"desc";
+  let lista = getLista();
+  lista.sort((a,b)=>direcao==="asc"?a.k-b.k:b.k-a.k);
+  render(lista);
 }
 
 carregarDados();
