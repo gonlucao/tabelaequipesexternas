@@ -27,6 +27,12 @@
     .topbar-content {
       display: flex;
       align-items: center;
+      justify-content: space-between;
+    }
+
+    .top-left {
+      display: flex;
+      align-items: center;
       gap: 15px;
     }
 
@@ -40,6 +46,21 @@
       color: white;
       font-size: 24px;
       font-weight: 700;
+    }
+
+    .btn-olho {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: white;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .btn-olho.ativo {
+      background: #16a34a;
+      color: white;
     }
 
     .container {
@@ -89,45 +110,6 @@
     .verde { background: #16a34a; }
     .vermelho { background: #dc2626; }
 
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.4);
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      width: 300px;
-      display: flex;
-      flex-direction: column;
-      max-height: 400px;
-    }
-
-    #listaNomes {
-      overflow-y: auto;
-      margin-top: 10px;
-      padding-right: 5px;
-    }
-
-    .btn {
-      margin-top: 10px;
-      padding: 8px 12px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .btn-aplicar { background: #16a34a; color: white; }
-    .btn-limpar { background: #dc2626; color: white; }
-
     .th-mes {
       display: flex;
       align-items: center;
@@ -158,8 +140,12 @@
 
   <div class="topbar">
     <div class="topbar-content">
-      <img src="https://i.ibb.co/YF0MfYXS/Logo-RBT-Perfil.jpg" class="logo">
-      <span class="titulo">Monitoramento - Metas equipes externa</span>
+      <div class="top-left">
+        <img src="https://i.ibb.co/YF0MfYXS/Logo-RBT-Perfil.jpg" class="logo">
+        <span class="titulo">Monitoramento - Metas equipes externa</span>
+      </div>
+
+      <button class="btn-olho" onclick="toggleOcultar(this)">👁️</button>
     </div>
   </div>
 
@@ -171,24 +157,14 @@
     <table id="tabela">
       <thead>
         <tr>
-          <th>
-            <div style="display:flex; align-items:center; gap:10px;">
-              <span>Técnico</span>
-              <button onclick="abrirFiltro()" class="btn" style="margin:0; padding:4px 8px; font-size:12px; background:#dc2626; color:white;">Filtrar</button>
-            </div>
-          </th>
+          <th>Técnico</th>
 
           <th><div class="th-mes">Jan <button class="btn-sort" onclick="ordenarMes(0,this)">↓</button></div></th>
           <th><div class="th-mes">Fev <button class="btn-sort" onclick="ordenarMes(1,this)">↓</button></div></th>
           <th><div class="th-mes">Mar <button class="btn-sort" onclick="ordenarMes(2,this)">↓</button></div></th>
 
           <th><div class="th-mes">Média <button class="btn-sort" onclick="ordenarMedia(this)">↓</button></div></th>
-
-          <th>
-            <div class="th-mes">
-              Status <button class="btn-sort" onclick="ordenarStatus(this)">↓</button>
-            </div>
-          </th>
+          <th><div class="th-mes">Status <button class="btn-sort" onclick="ordenarStatus(this)">↓</button></div></th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -197,25 +173,11 @@
 
 </div>
 
-<div id="modalFiltro" class="modal">
-  <div class="modal-content">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-      <h3 style="margin:0;">Filtrar Técnicos</h3>
-      <div>
-        <button class="btn btn-aplicar" onclick="aplicarFiltro()">Aplicar</button>
-        <button class="btn btn-limpar" onclick="limparFiltro()">Limpar</button>
-      </div>
-    </div>
-    <div id="listaNomes"></div>
-  </div>
-</div>
-
 <script>
 let dadosTecnicos = {};
-let nomesFiltrados = [];
-
 let tipoOrdenacao = null;
 let direcao = "desc";
+let ocultarBaixos = false;
 
 document.getElementById('upload').addEventListener('change', handleFile);
 
@@ -235,16 +197,12 @@ function handleFile(e) {
 
       rows.forEach((row, i) => {
         if (i === 0) return;
-
         const nome = row[0];
         const total = row[19];
 
         if (!nome) return;
 
-        if (!dadosTecnicos[nome]) {
-          dadosTecnicos[nome] = [0, 0, 0];
-        }
-
+        if (!dadosTecnicos[nome]) dadosTecnicos[nome] = [0,0,0];
         dadosTecnicos[nome][index] = Number(total) || 0;
       });
     });
@@ -267,12 +225,11 @@ function renderTabela() {
 
   if (tipoOrdenacao !== null) {
     lista.sort((a, b) => {
-
       let valA, valB;
 
       if (tipoOrdenacao === "media") {
-        valA = dadosTecnicos[a].reduce((x,y)=>x+y,0)/3;
-        valB = dadosTecnicos[b].reduce((x,y)=>x+y,0)/3;
+        valA = media(dadosTecnicos[a]);
+        valB = media(dadosTecnicos[b]);
       } else if (tipoOrdenacao === "status") {
         let metasA = contarMetas(dadosTecnicos[a]);
         let metasB = contarMetas(dadosTecnicos[b]);
@@ -281,10 +238,8 @@ function renderTabela() {
           return direcao === "desc" ? metasB - metasA : metasA - metasB;
         }
 
-        let mediaA = dadosTecnicos[a].reduce((x,y)=>x+y,0)/3;
-        let mediaB = dadosTecnicos[b].reduce((x,y)=>x+y,0)/3;
-
-        return direcao === "desc" ? mediaB - mediaA : mediaA - mediaB;
+        return direcao === "desc" ? media(dadosTecnicos[b]) - media(dadosTecnicos[a])
+                                 : media(dadosTecnicos[a]) - media(dadosTecnicos[b]);
       } else {
         valA = dadosTecnicos[a][tipoOrdenacao];
         valB = dadosTecnicos[b][tipoOrdenacao];
@@ -295,25 +250,22 @@ function renderTabela() {
   }
 
   lista.forEach(nome => {
-
-    if (nomesFiltrados.length > 0 && !nomesFiltrados.includes(nome)) return;
-
     let meses = dadosTecnicos[nome];
-    let media = meses.reduce((a, b) => a + b, 0) / meses.length;
+    let m = media(meses);
+
+    if (ocultarBaixos && m < 50) return;
 
     let linha = `<tr><td><strong>${nome}</strong></td>`;
 
-    meses.forEach(valor => {
-      linha += `<td class="${valor >= 170 ? 'meta-ok' : 'meta-bad'}">${valor}</td>`;
+    meses.forEach(v => {
+      linha += `<td class="${v >= 170 ? 'meta-ok':'meta-bad'}">${v}</td>`;
     });
 
-    linha += `<td>${media.toFixed(1)}</td>`;
+    linha += `<td>${m.toFixed(1)}</td>`;
 
-    const mesesLabel = ["JAN","FEV","MAR"];
     let status = "";
-
-    meses.forEach((valor, i) => {
-      status += `<span class="circulo ${valor >= 170 ? 'verde' : 'vermelho'}">${mesesLabel[i]}</span>`;
+    ["JAN","FEV","MAR"].forEach((mes,i)=>{
+      status += `<span class="circulo ${meses[i]>=170?'verde':'vermelho'}">${mes}</span>`;
     });
 
     linha += `<td>${status}</td></tr>`;
@@ -321,68 +273,36 @@ function renderTabela() {
   });
 }
 
-function ordenarMes(index, botao) {
-  if (tipoOrdenacao === index) {
-    direcao = direcao === "desc" ? "asc" : "desc";
-  } else {
-    tipoOrdenacao = index;
-    direcao = "desc";
-  }
-  atualizarIcones(botao);
-  renderTabela();
+function media(arr){
+  return arr.reduce((a,b)=>a+b,0)/arr.length;
 }
 
-function ordenarMedia(botao) {
-  if (tipoOrdenacao === "media") {
-    direcao = direcao === "desc" ? "asc" : "desc";
-  } else {
-    tipoOrdenacao = "media";
-    direcao = "desc";
-  }
-  atualizarIcones(botao);
-  renderTabela();
+function ordenarMes(i,btn){
+  if(tipoOrdenacao===i){direcao = direcao==="desc"?"asc":"desc";}
+  else{tipoOrdenacao=i;direcao="desc";}
+  atualizarIcones(btn); renderTabela();
 }
 
-function ordenarStatus(botao) {
-  if (tipoOrdenacao === "status") {
-    direcao = direcao === "desc" ? "asc" : "desc";
-  } else {
-    tipoOrdenacao = "status";
-    direcao = "desc";
-  }
-  atualizarIcones(botao);
-  renderTabela();
+function ordenarMedia(btn){
+  if(tipoOrdenacao==="media"){direcao = direcao==="desc"?"asc":"desc";}
+  else{tipoOrdenacao="media";direcao="desc";}
+  atualizarIcones(btn); renderTabela();
 }
 
-function atualizarIcones(botaoAtivo) {
-  document.querySelectorAll(".btn-sort").forEach(btn => btn.textContent = "↓");
-  botaoAtivo.textContent = direcao === "desc" ? "↓" : "↑";
+function ordenarStatus(btn){
+  if(tipoOrdenacao==="status"){direcao = direcao==="desc"?"asc":"desc";}
+  else{tipoOrdenacao="status";direcao="desc";}
+  atualizarIcones(btn); renderTabela();
 }
 
-function abrirFiltro() {
-  const modal = document.getElementById("modalFiltro");
-  const lista = document.getElementById("listaNomes");
-
-  lista.innerHTML = "";
-
-  Object.keys(dadosTecnicos).forEach(nome => {
-    const checked = nomesFiltrados.includes(nome) ? "checked" : "";
-    lista.innerHTML += `<div><input type="checkbox" value="${nome}" ${checked}> ${nome}</div>`;
-  });
-
-  modal.style.display = "flex";
+function atualizarIcones(btn){
+  document.querySelectorAll(".btn-sort").forEach(b=>b.textContent="↓");
+  btn.textContent = direcao==="desc"?"↓":"↑";
 }
 
-function aplicarFiltro() {
-  const checks = document.querySelectorAll("#listaNomes input:checked");
-  nomesFiltrados = Array.from(checks).map(c => c.value);
-  document.getElementById("modalFiltro").style.display = "none";
-  renderTabela();
-}
-
-function limparFiltro() {
-  nomesFiltrados = [];
-  document.getElementById("modalFiltro").style.display = "none";
+function toggleOcultar(btn){
+  ocultarBaixos = !ocultarBaixos;
+  btn.classList.toggle("ativo");
   renderTabela();
 }
 </script>
