@@ -18,7 +18,7 @@ body {
   margin:auto;
 }
 
-/* TOPO COM LOGO */
+/* TOPO */
 .topbar {
   background: linear-gradient(90deg,#b91c1c,#dc2626);
   padding: 15px 20px;
@@ -33,7 +33,12 @@ body {
 }
 
 .logo {
-  height: 40px;
+  height: 45px;
+  max-width: 150px;
+  object-fit: contain;
+  background: white;
+  padding: 4px;
+  border-radius: 6px;
 }
 
 /* CARD */
@@ -63,7 +68,6 @@ th:first-child,td:first-child {
 .meta-ok{color:green;}
 .meta-bad{color:red;}
 
-/* STATUS */
 .circulo{
   display:inline-flex;
   align-items:center;
@@ -79,7 +83,6 @@ th:first-child,td:first-child {
 .verde{background:#16a34a;}
 .vermelho{background:#dc2626;}
 
-/* BOTÕES */
 .btn-sort {
   cursor:pointer;
   margin-left:5px;
@@ -93,12 +96,10 @@ th:first-child,td:first-child {
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.2s;
 }
 
 .btn-filtro:hover {
   background: #b91c1c;
-  transform: scale(1.05);
 }
 
 /* MODAL */
@@ -131,7 +132,6 @@ th:first-child,td:first-child {
   border-bottom:1px solid #eee;
   display:flex;
   justify-content:space-between;
-  z-index:1;
 }
 
 .lista-scroll{
@@ -145,7 +145,6 @@ th:first-child,td:first-child {
   border: none;
   padding: 6px 10px;
   border-radius: 6px;
-  cursor: pointer;
 }
 
 .btn-limpar {
@@ -154,7 +153,6 @@ th:first-child,td:first-child {
   border: none;
   padding: 6px 10px;
   border-radius: 6px;
-  cursor: pointer;
 }
 </style>
 </head>
@@ -165,7 +163,8 @@ th:first-child,td:first-child {
 
 <div class="topbar">
   <div class="topbar-content">
-    <img src="SUA_LOGO_AQUI.png" class="logo">
+    <!-- 🔥 COLE SEU LINK DIRETO AQUI -->
+    <img src="COLE_AQUI_O_LINK_DIRETO_DA_LOGO" class="logo">
     <span>Monitoramento - Metas equipes externa</span>
   </div>
 </div>
@@ -203,6 +202,8 @@ th:first-child,td:first-child {
 </div>
 
 <script>
+// (mesmo JS que você já tinha — mantido igual)
+
 let dadosTecnicos = {};
 let listaOrdenada = [];
 let nomesFiltrados = [];
