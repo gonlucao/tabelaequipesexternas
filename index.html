@@ -127,6 +127,29 @@
 
     .btn-aplicar { background: #16a34a; color: white; }
     .btn-limpar { background: #dc2626; color: white; }
+
+    .th-mes {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-sort {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: none;
+      background: #e5e7eb;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .btn-sort:hover {
+      background: #dc2626;
+      color: white;
+    }
   </style>
 </head>
 
@@ -154,9 +177,25 @@
               <button onclick="abrirFiltro()" class="btn" style="margin:0; padding:4px 8px; font-size:12px; background:#dc2626; color:white;">Filtrar</button>
             </div>
           </th>
-          <th>Jan</th>
-          <th>Fev</th>
-          <th>Mar</th>
+
+          <th>
+            <div class="th-mes">
+              Jan <button class="btn-sort" onclick="ordenarMes(0)">↓</button>
+            </div>
+          </th>
+
+          <th>
+            <div class="th-mes">
+              Fev <button class="btn-sort" onclick="ordenarMes(1)">↓</button>
+            </div>
+          </th>
+
+          <th>
+            <div class="th-mes">
+              Mar <button class="btn-sort" onclick="ordenarMes(2)">↓</button>
+            </div>
+          </th>
+
           <th>Média</th>
           <th>Status</th>
         </tr>
@@ -184,6 +223,7 @@
 <script>
 let dadosTecnicos = {};
 let nomesFiltrados = [];
+let ordemAtual = null;
 
 document.getElementById('upload').addEventListener('change', handleFile);
 
@@ -227,10 +267,16 @@ function renderTabela() {
   let tbody = document.querySelector("#tabela tbody");
   tbody.innerHTML = "";
 
-  for (let nome in dadosTecnicos) {
+  let lista = Object.keys(dadosTecnicos);
+
+  if (ordemAtual !== null) {
+    lista.sort((a, b) => dadosTecnicos[b][ordemAtual] - dadosTecnicos[a][ordemAtual]);
+  }
+
+  lista.forEach(nome => {
 
     if (nomesFiltrados.length > 0 && !nomesFiltrados.includes(nome)) {
-      continue;
+      return;
     }
 
     let meses = dadosTecnicos[nome];
@@ -259,7 +305,12 @@ function renderTabela() {
     linha += `<td>${status}</td></tr>`;
 
     tbody.innerHTML += linha;
-  }
+  });
+}
+
+function ordenarMes(index) {
+  ordemAtual = index;
+  renderTabela();
 }
 
 function abrirFiltro() {
