@@ -1,182 +1,7 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <title>Dashboard de Técnicos</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #f5f7fb;
-      margin: 0;
-      padding: 20px;
-      color: #333;
-    }
-
-    .topbar {
-      background: linear-gradient(90deg, #b91c1c, #dc2626);
-      padding: 25px 20px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-    }
-
-    .topbar-content {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .titulo {
-      color: white;
-      font-size: 24px;
-      font-weight: 700;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: auto;
-    }
-
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 16px;
-      margin-top: 20px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-
-    th, td {
-      padding: 12px;
-      border-bottom: 1px solid #eee;
-      text-align: center;
-    }
-
-    th:first-child, td:first-child {
-      text-align: left;
-    }
-
-    .meta-ok { color: green; }
-    .meta-bad { color: red; }
-
-    .circulo {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      font-size: 11px;
-      font-weight: 700;
-      margin-right: 5px;
-      color: white;
-    }
-
-    .verde { background: #16a34a; }
-    .vermelho { background: #dc2626; }
-
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.4);
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      width: 300px;
-      display: flex;
-      flex-direction: column;
-      max-height: 400px;
-    }
-
-    #listaNomes {
-      overflow-y: auto;
-      margin-top: 10px;
-      padding-right: 5px;
-    }
-
-    .btn {
-      margin-top: 10px;
-      padding: 8px 12px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .btn-aplicar { background: #16a34a; color: white; }
-    .btn-limpar { background: #dc2626; color: white; }
-  </style>
-</head>
-
-<body>
-<div class="container">
-
-  <div class="topbar">
-    <div class="topbar-content">
-      <span class="titulo">Dashboard de Técnicos</span>
-    </div>
-  </div>
-
-  <div class="card">
-    <input type="file" id="upload" />
-  </div>
-
-  <div class="card">
-    <table id="tabela">
-      <thead>
-        <tr>
-          <th>
-            <div style="display:flex; align-items:center; gap:10px;">
-              <span>Técnico</span>
-              <button onclick="abrirFiltro()" class="btn" style="margin:0; padding:4px 8px; font-size:12px; background:#dc2626; color:white;">Filtrar</button>
-            </div>
-          </th>
-          <th>Jan</th>
-          <th>Fev</th>
-          <th>Mar</th>
-          <th>Média</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-</div>
-
-<div id="modalFiltro" class="modal">
-  <div class="modal-content">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-      <h3 style="margin:0;">Filtrar Técnicos</h3>
-      <div>
-        <button class="btn btn-aplicar" onclick="aplicarFiltro()">Aplicar</button>
-        <button class="btn btn-limpar" onclick="limparFiltro()">Limpar</button>
-      </div>
-    </div>
-
-    <div id="listaNomes"></div>
-  </div>
-</div>
-
 <script>
 let dadosTecnicos = {};
 let nomesFiltrados = [];
+let ordenacaoAtual = null;
 
 document.getElementById('upload').addEventListener('change', handleFile);
 
@@ -216,32 +41,47 @@ function handleFile(e) {
   reader.readAsArrayBuffer(file);
 }
 
+function getDadosOrdenados() {
+  let lista = Object.keys(dadosTecnicos).map(nome => {
+    let meses = dadosTecnicos[nome];
+    let media = meses.reduce((a, b) => a + b, 0) / meses.length;
+    let metasBatidas = meses.filter(v => v >= 170).length;
+
+    return { nome, meses, media, metasBatidas };
+  });
+
+  if (ordenacaoAtual) {
+    lista.sort(ordenacaoAtual);
+  }
+
+  return lista;
+}
+
 function renderTabela() {
   let tbody = document.querySelector("#tabela tbody");
   tbody.innerHTML = "";
 
-  for (let nome in dadosTecnicos) {
+  let lista = getDadosOrdenados();
 
-    if (nomesFiltrados.length > 0 && !nomesFiltrados.includes(nome)) {
-      continue;
+  lista.forEach(item => {
+
+    if (nomesFiltrados.length > 0 && !nomesFiltrados.includes(item.nome)) {
+      return;
     }
 
-    let meses = dadosTecnicos[nome];
-    let media = meses.reduce((a, b) => a + b, 0) / meses.length;
+    let linha = `<tr><td><strong>${item.nome}</strong></td>`;
 
-    let linha = `<tr><td><strong>${nome}</strong></td>`;
-
-    meses.forEach(valor => {
+    item.meses.forEach(valor => {
       let classe = valor >= 170 ? "meta-ok" : "meta-bad";
       linha += `<td class="${classe}">${valor}</td>`;
     });
 
-    linha += `<td>${media.toFixed(1)}</td>`;
+    linha += `<td>${item.media.toFixed(1)}</td>`;
 
     const mesesLabel = ["JAN","FEV","MAR"];
     let status = "";
 
-    meses.forEach((valor, i) => {
+    item.meses.forEach((valor, i) => {
       if (valor >= 170) {
         status += `<span class="circulo verde">${mesesLabel[i]}</span>`;
       } else {
@@ -250,9 +90,28 @@ function renderTabela() {
     });
 
     linha += `<td>${status}</td></tr>`;
-
     tbody.innerHTML += linha;
-  }
+  });
+}
+
+function ordenarPorMes(index) {
+  ordenacaoAtual = (a, b) => b.meses[index] - a.meses[index];
+  renderTabela();
+}
+
+function ordenarPorMedia() {
+  ordenacaoAtual = (a, b) => b.media - a.media;
+  renderTabela();
+}
+
+function ordenarPorDesempenho() {
+  ordenacaoAtual = (a, b) => {
+    if (b.metasBatidas !== a.metasBatidas) {
+      return b.metasBatidas - a.metasBatidas;
+    }
+    return b.media - a.media;
+  };
+  renderTabela();
 }
 
 function abrirFiltro() {
@@ -288,6 +147,3 @@ function limparFiltro() {
   renderTabela();
 }
 </script>
-
-</body>
-</html>
