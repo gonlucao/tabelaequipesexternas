@@ -55,23 +55,41 @@ body {
   font-weight:bold;
 }
 
-/* META CARDS */
+/* 🔥 META CARDS AJUSTADOS */
 .meta-grid {
   display:grid;
   grid-template-columns: repeat(3,1fr);
-  gap:10px;
-  margin-top:10px;
+  gap:12px;
+  margin-top:12px;
 }
 
 .meta-box {
-  padding:12px;
-  border-radius:10px;
+  padding:18px;
+  border-radius:14px;
   color:white;
   text-align:center;
+  transition:0.2s;
+  box-shadow:0 4px 10px #00000010;
 }
 
-.meta-box strong { font-size:20px; display:block; }
+.meta-box strong {
+  font-size:30px;
+  display:block;
+  font-weight:700;
+}
 
+.meta-box span {
+  font-size:13px;
+  opacity:0.9;
+}
+
+/* hover efeito */
+.meta-box:hover {
+  transform: translateY(-3px);
+  box-shadow:0 8px 18px #00000020;
+}
+
+/* cores */
 .meta3 { background:#16a34a; }
 .meta2 { background:#f59e0b; }
 .meta1 { background:#dc2626; }
@@ -147,6 +165,7 @@ tr:hover { background:#f9fafb; }
 
 <div class="container">
 
+<!-- TOP -->
 <div class="topbar">
   <div class="topbar-content">
     <img src="https://i.ibb.co/rjpBZ8P/Logo-RBT-Perfil.jpg" class="logo">
@@ -192,6 +211,7 @@ tr:hover { background:#f9fafb; }
 <!-- TOP 3 -->
 <div class="top3" id="top3"></div>
 
+<!-- TABELA -->
 <div class="card">
 <table>
 <thead>
@@ -219,6 +239,7 @@ async function carregarMes(gid){
   const url = `https://docs.google.com/spreadsheets/d/1KAmeD9jbBX8JssWWeWG3kR03J4zVEjQDx--ojQIFSmg/gviz/tq?tqx=out:json&gid=${gid}`;
   const res = await fetch(url);
   const text = await res.text();
+
   const json = JSON.parse(text.substr(47).slice(0,-2));
   return json.table.rows;
 }
@@ -244,20 +265,18 @@ async function carregarDados(){
 function media(a){ return a.reduce((x,y)=>x+y,0)/a.length; }
 function metas(a){ return a.filter(v=>v>=170).length; }
 
-function getLista(){
-  return Object.keys(dadosTecnicos).map(n=>{
+function render(){
+
+  let dados = Object.keys(dadosTecnicos).map(n=>{
     let v=dadosTecnicos[n];
     return {n,v,m:media(v),k:metas(v)};
   }).filter(x=>x.m>=50);
-}
-
-function render(){
-  let dados = getLista();
 
   if(dados.length === 0) return;
 
-  // KPIs
+  /* KPIs */
   document.getElementById("totalTec").innerText = dados.length;
+
   document.getElementById("mediaGeral").innerText =
     (dados.reduce((s,x)=>s+x.m,0)/dados.length).toFixed(1);
 
@@ -270,22 +289,23 @@ function render(){
   document.getElementById("meta1").innerText =
     Math.round((dados.filter(x=>x.k===1).length/dados.length)*100)+"%";
 
-  // TOP 3
+  /* TOP 3 */
   let top3=document.getElementById("top3");
   top3.innerHTML="";
-  const estilos=["gold","silver","bronze"];
+
   const medalhas=["🥇","🥈","🥉"];
 
   dados.slice(0,3).forEach((t,i)=>{
     top3.innerHTML+=`
-      <div class="top3-card ${estilos[i]}">
-        <div style="font-size:22px">${medalhas[i]}</div>
+      <div class="top3-card">
+        <div style="font-size:24px">${medalhas[i]}</div>
         <strong>${t.n}</strong>
         <div>${t.m.toFixed(1)}</div>
-      </div>`;
+      </div>
+    `;
   });
 
-  // TABELA
+  /* TABELA */
   let tbody=document.getElementById("tbody");
   tbody.innerHTML="";
 
