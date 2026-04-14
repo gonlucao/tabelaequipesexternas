@@ -32,7 +32,6 @@
 
     .logo {
       height: 60px;
-      object-fit: contain;
       border-radius: 8px;
     }
 
@@ -111,6 +110,38 @@
       background: #dc2626;
       color: white;
     }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.4);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      width: 300px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .btn {
+      padding: 6px 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .btn-aplicar { background: #16a34a; color: white; }
+    .btn-limpar { background: #dc2626; color: white; }
   </style>
 </head>
 
@@ -132,7 +163,10 @@
     <table id="tabela">
       <thead>
         <tr>
-          <th>Técnico</th>
+          <th>
+            Técnico
+            <button onclick="abrirFiltro()" class="btn" style="background:#dc2626;color:white;">Filtrar</button>
+          </th>
 
           <th><div class="th-mes">Jan <button class="btn-sort" onclick="ordenarMes(0,this)">↓</button></div></th>
           <th><div class="th-mes">Fev <button class="btn-sort" onclick="ordenarMes(1,this)">↓</button></div></th>
@@ -148,8 +182,20 @@
 
 </div>
 
+<!-- MODAL -->
+<div id="modalFiltro" class="modal">
+  <div class="modal-content">
+    <h3>Filtrar Técnicos</h3>
+    <div id="listaNomes"></div>
+    <button class="btn btn-aplicar" onclick="aplicarFiltro()">Aplicar</button>
+    <button class="btn btn-limpar" onclick="limparFiltro()">Limpar</button>
+  </div>
+</div>
+
 <script>
 let dadosTecnicos = {};
+let nomesFiltrados = [];
+
 let tipoOrdenacao = null;
 let direcao = "desc";
 
@@ -238,7 +284,9 @@ function renderTabela() {
     let meses = dadosTecnicos[nome];
     let m = media(meses);
 
-    if (m < 50) return; // 🔥 ocultação automática
+    if (m < 50) return; // ocultação automática
+
+    if (nomesFiltrados.length > 0 && !nomesFiltrados.includes(nome)) return;
 
     let linha = `<tr><td><strong>${nome}</strong></td>`;
 
@@ -279,6 +327,33 @@ function ordenarStatus(btn){
 function atualizarIcones(btn){
   document.querySelectorAll(".btn-sort").forEach(b=>b.textContent="↓");
   btn.textContent = direcao==="desc"?"↓":"↑";
+}
+
+// FILTRO NOME
+function abrirFiltro(){
+  let modal = document.getElementById("modalFiltro");
+  let lista = document.getElementById("listaNomes");
+
+  lista.innerHTML = "";
+
+  Object.keys(dadosTecnicos).forEach(nome=>{
+    lista.innerHTML += `<div><input type="checkbox" value="${nome}"> ${nome}</div>`;
+  });
+
+  modal.style.display = "flex";
+}
+
+function aplicarFiltro(){
+  let checks = document.querySelectorAll("#listaNomes input:checked");
+  nomesFiltrados = Array.from(checks).map(c=>c.value);
+  document.getElementById("modalFiltro").style.display = "none";
+  renderTabela();
+}
+
+function limparFiltro(){
+  nomesFiltrados = [];
+  document.getElementById("modalFiltro").style.display = "none";
+  renderTabela();
 }
 </script>
 
