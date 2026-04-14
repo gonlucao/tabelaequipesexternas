@@ -178,31 +178,17 @@
             </div>
           </th>
 
-          <th>
-            <div class="th-mes">
-              Jan <button class="btn-sort" onclick="ordenarMes(0, this)">↓</button>
-            </div>
-          </th>
+          <th><div class="th-mes">Jan <button class="btn-sort" onclick="ordenarMes(0,this)">↓</button></div></th>
+          <th><div class="th-mes">Fev <button class="btn-sort" onclick="ordenarMes(1,this)">↓</button></div></th>
+          <th><div class="th-mes">Mar <button class="btn-sort" onclick="ordenarMes(2,this)">↓</button></div></th>
+
+          <th><div class="th-mes">Média <button class="btn-sort" onclick="ordenarMedia(this)">↓</button></div></th>
 
           <th>
             <div class="th-mes">
-              Fev <button class="btn-sort" onclick="ordenarMes(1, this)">↓</button>
+              Status <button class="btn-sort" onclick="ordenarStatus(this)">↓</button>
             </div>
           </th>
-
-          <th>
-            <div class="th-mes">
-              Mar <button class="btn-sort" onclick="ordenarMes(2, this)">↓</button>
-            </div>
-          </th>
-
-          <th>
-            <div class="th-mes">
-              Média <button class="btn-sort" onclick="ordenarMedia(this)">↓</button>
-            </div>
-          </th>
-
-          <th>Status</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -220,7 +206,6 @@
         <button class="btn btn-limpar" onclick="limparFiltro()">Limpar</button>
       </div>
     </div>
-
     <div id="listaNomes"></div>
   </div>
 </div>
@@ -270,6 +255,10 @@ function handleFile(e) {
   reader.readAsArrayBuffer(file);
 }
 
+function contarMetas(meses){
+  return meses.filter(v => v >= 170).length;
+}
+
 function renderTabela() {
   let tbody = document.querySelector("#tabela tbody");
   tbody.innerHTML = "";
@@ -284,6 +273,18 @@ function renderTabela() {
       if (tipoOrdenacao === "media") {
         valA = dadosTecnicos[a].reduce((x,y)=>x+y,0)/3;
         valB = dadosTecnicos[b].reduce((x,y)=>x+y,0)/3;
+      } else if (tipoOrdenacao === "status") {
+        let metasA = contarMetas(dadosTecnicos[a]);
+        let metasB = contarMetas(dadosTecnicos[b]);
+
+        if (metasA !== metasB) {
+          return direcao === "desc" ? metasB - metasA : metasA - metasB;
+        }
+
+        let mediaA = dadosTecnicos[a].reduce((x,y)=>x+y,0)/3;
+        let mediaB = dadosTecnicos[b].reduce((x,y)=>x+y,0)/3;
+
+        return direcao === "desc" ? mediaB - mediaA : mediaA - mediaB;
       } else {
         valA = dadosTecnicos[a][tipoOrdenacao];
         valB = dadosTecnicos[b][tipoOrdenacao];
@@ -303,8 +304,7 @@ function renderTabela() {
     let linha = `<tr><td><strong>${nome}</strong></td>`;
 
     meses.forEach(valor => {
-      let classe = valor >= 170 ? "meta-ok" : "meta-bad";
-      linha += `<td class="${classe}">${valor}</td>`;
+      linha += `<td class="${valor >= 170 ? 'meta-ok' : 'meta-bad'}">${valor}</td>`;
     });
 
     linha += `<td>${media.toFixed(1)}</td>`;
@@ -328,7 +328,6 @@ function ordenarMes(index, botao) {
     tipoOrdenacao = index;
     direcao = "desc";
   }
-
   atualizarIcones(botao);
   renderTabela();
 }
@@ -340,7 +339,17 @@ function ordenarMedia(botao) {
     tipoOrdenacao = "media";
     direcao = "desc";
   }
+  atualizarIcones(botao);
+  renderTabela();
+}
 
+function ordenarStatus(botao) {
+  if (tipoOrdenacao === "status") {
+    direcao = direcao === "desc" ? "asc" : "desc";
+  } else {
+    tipoOrdenacao = "status";
+    direcao = "desc";
+  }
   atualizarIcones(botao);
   renderTabela();
 }
