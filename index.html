@@ -111,6 +111,7 @@
       color: white;
     }
 
+    /* MODAL */
     .modal {
       display: none;
       position: fixed;
@@ -125,11 +126,25 @@
 
     .modal-content {
       background: white;
-      padding: 20px;
+      width: 320px;
       border-radius: 12px;
-      width: 300px;
+      display: flex;
+      flex-direction: column;
       max-height: 400px;
+    }
+
+    .modal-header {
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+      position: sticky;
+      top: 0;
+      background: white;
+      z-index: 10;
+    }
+
+    .modal-body {
       overflow-y: auto;
+      padding: 10px 15px;
     }
 
     .btn {
@@ -137,7 +152,8 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      margin-top: 10px;
+      margin-top: 5px;
+      margin-right: 5px;
     }
 
     .btn-aplicar { background: #16a34a; color: white; }
@@ -185,10 +201,15 @@
 <!-- MODAL -->
 <div id="modalFiltro" class="modal">
   <div class="modal-content">
-    <h3>Filtrar Técnicos</h3>
-    <div id="listaNomes"></div>
-    <button class="btn btn-aplicar" onclick="aplicarFiltro()">Aplicar</button>
-    <button class="btn btn-limpar" onclick="limparFiltro()">Limpar</button>
+
+    <div class="modal-header">
+      <strong>Filtrar Técnicos</strong><br>
+      <button class="btn btn-aplicar" onclick="aplicarFiltro()">Aplicar</button>
+      <button class="btn btn-limpar" onclick="limparFiltro()">Limpar</button>
+    </div>
+
+    <div class="modal-body" id="listaNomes"></div>
+
   </div>
 </div>
 
@@ -251,41 +272,12 @@ function renderTabela() {
 
   let lista = Object.keys(dadosTecnicos);
 
-  if (tipoOrdenacao !== null) {
-    lista.sort((a, b) => {
-
-      if (tipoOrdenacao === "media") {
-        return direcao === "desc"
-          ? media(dadosTecnicos[b]) - media(dadosTecnicos[a])
-          : media(dadosTecnicos[a]) - media(dadosTecnicos[b]);
-      }
-
-      if (tipoOrdenacao === "status") {
-        let metasA = contarMetas(dadosTecnicos[a]);
-        let metasB = contarMetas(dadosTecnicos[b]);
-
-        if (metasA !== metasB) {
-          return direcao === "desc" ? metasB - metasA : metasA - metasB;
-        }
-
-        return direcao === "desc"
-          ? media(dadosTecnicos[b]) - media(dadosTecnicos[a])
-          : media(dadosTecnicos[a]) - media(dadosTecnicos[b]);
-      }
-
-      return direcao === "desc"
-        ? dadosTecnicos[b][tipoOrdenacao] - dadosTecnicos[a][tipoOrdenacao]
-        : dadosTecnicos[a][tipoOrdenacao] - dadosTecnicos[b][tipoOrdenacao];
-    });
-  }
-
   lista.forEach(nome => {
 
     let meses = dadosTecnicos[nome];
     let m = media(meses);
 
-    if (m < 50) return; // ocultação automática
-
+    if (m < 50) return;
     if (nomesFiltrados.length > 0 && !nomesFiltrados.includes(nome)) return;
 
     let linha = `<tr><td><strong>${nome}</strong></td>`;
@@ -306,41 +298,15 @@ function renderTabela() {
   });
 }
 
-function ordenarMes(i,btn){
-  if(tipoOrdenacao===i){direcao = direcao==="desc"?"asc":"desc";}
-  else{tipoOrdenacao=i;direcao="desc";}
-  atualizarIcones(btn); renderTabela();
-}
-
-function ordenarMedia(btn){
-  if(tipoOrdenacao==="media"){direcao = direcao==="desc"?"asc":"desc";}
-  else{tipoOrdenacao="media";direcao="desc";}
-  atualizarIcones(btn); renderTabela();
-}
-
-function ordenarStatus(btn){
-  if(tipoOrdenacao==="status"){direcao = direcao==="desc"?"asc":"desc";}
-  else{tipoOrdenacao="status";direcao="desc";}
-  atualizarIcones(btn); renderTabela();
-}
-
-function atualizarIcones(btn){
-  document.querySelectorAll(".btn-sort").forEach(b=>b.textContent="↓");
-  btn.textContent = direcao==="desc"?"↓":"↑";
-}
-
-// FILTRO NOME
 function abrirFiltro(){
-  let modal = document.getElementById("modalFiltro");
   let lista = document.getElementById("listaNomes");
-
   lista.innerHTML = "";
 
   Object.keys(dadosTecnicos).forEach(nome=>{
     lista.innerHTML += `<div><input type="checkbox" value="${nome}"> ${nome}</div>`;
   });
 
-  modal.style.display = "flex";
+  document.getElementById("modalFiltro").style.display = "flex";
 }
 
 function aplicarFiltro(){
