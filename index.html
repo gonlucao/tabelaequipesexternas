@@ -119,11 +119,11 @@
 <script>
 let dadosTecnicos = {};
 
-// IDs das abas (ordem: Jan, Fev, Mar)
-const abas = [0, 1, 2];
+// nomes EXATOS das abas
+const abas = ["01", "02", "03"];
 
-async function carregarMes(gid){
-  const url = `https://docs.google.com/spreadsheets/d/1KAmeD9jbBX8JssWWeWG3kR03J4zVEjQDx--ojQIFSmg/gviz/tq?tqx=out:json&gid=${gid}`;
+async function carregarMes(nomeAba){
+  const url = `https://docs.google.com/spreadsheets/d/1KAmeD9jbBX8JssWWeWG3kR03J4zVEjQDx--ojQIFSmg/gviz/tq?tqx=out:json&sheet=${nomeAba}`;
   
   const res = await fetch(url);
   const text = await res.text();
@@ -190,7 +190,7 @@ function renderTabela() {
   });
 }
 
-// carregar automático
+// inicia automático
 carregarDadosOnline();
 </script>
 
