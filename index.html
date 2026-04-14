@@ -180,23 +180,28 @@
 
           <th>
             <div class="th-mes">
-              Jan <button class="btn-sort" onclick="ordenarMes(0)">↓</button>
+              Jan <button class="btn-sort" onclick="ordenarMes(0, this)">↓</button>
             </div>
           </th>
 
           <th>
             <div class="th-mes">
-              Fev <button class="btn-sort" onclick="ordenarMes(1)">↓</button>
+              Fev <button class="btn-sort" onclick="ordenarMes(1, this)">↓</button>
             </div>
           </th>
 
           <th>
             <div class="th-mes">
-              Mar <button class="btn-sort" onclick="ordenarMes(2)">↓</button>
+              Mar <button class="btn-sort" onclick="ordenarMes(2, this)">↓</button>
             </div>
           </th>
 
-          <th>Média</th>
+          <th>
+            <div class="th-mes">
+              Média <button class="btn-sort" onclick="ordenarMedia(this)">↓</button>
+            </div>
+          </th>
+
           <th>Status</th>
         </tr>
       </thead>
@@ -223,7 +228,9 @@
 <script>
 let dadosTecnicos = {};
 let nomesFiltrados = [];
-let ordemAtual = null;
+
+let tipoOrdenacao = null;
+let direcao = "desc";
 
 document.getElementById('upload').addEventListener('change', handleFile);
 
@@ -269,15 +276,26 @@ function renderTabela() {
 
   let lista = Object.keys(dadosTecnicos);
 
-  if (ordemAtual !== null) {
-    lista.sort((a, b) => dadosTecnicos[b][ordemAtual] - dadosTecnicos[a][ordemAtual]);
+  if (tipoOrdenacao !== null) {
+    lista.sort((a, b) => {
+
+      let valA, valB;
+
+      if (tipoOrdenacao === "media") {
+        valA = dadosTecnicos[a].reduce((x,y)=>x+y,0)/3;
+        valB = dadosTecnicos[b].reduce((x,y)=>x+y,0)/3;
+      } else {
+        valA = dadosTecnicos[a][tipoOrdenacao];
+        valB = dadosTecnicos[b][tipoOrdenacao];
+      }
+
+      return direcao === "desc" ? valB - valA : valA - valB;
+    });
   }
 
   lista.forEach(nome => {
 
-    if (nomesFiltrados.length > 0 && !nomesFiltrados.includes(nome)) {
-      return;
-    }
+    if (nomesFiltrados.length > 0 && !nomesFiltrados.includes(nome)) return;
 
     let meses = dadosTecnicos[nome];
     let media = meses.reduce((a, b) => a + b, 0) / meses.length;
@@ -295,22 +313,41 @@ function renderTabela() {
     let status = "";
 
     meses.forEach((valor, i) => {
-      if (valor >= 170) {
-        status += `<span class="circulo verde">${mesesLabel[i]}</span>`;
-      } else {
-        status += `<span class="circulo vermelho">${mesesLabel[i]}</span>`;
-      }
+      status += `<span class="circulo ${valor >= 170 ? 'verde' : 'vermelho'}">${mesesLabel[i]}</span>`;
     });
 
     linha += `<td>${status}</td></tr>`;
-
     tbody.innerHTML += linha;
   });
 }
 
-function ordenarMes(index) {
-  ordemAtual = index;
+function ordenarMes(index, botao) {
+  if (tipoOrdenacao === index) {
+    direcao = direcao === "desc" ? "asc" : "desc";
+  } else {
+    tipoOrdenacao = index;
+    direcao = "desc";
+  }
+
+  atualizarIcones(botao);
   renderTabela();
+}
+
+function ordenarMedia(botao) {
+  if (tipoOrdenacao === "media") {
+    direcao = direcao === "desc" ? "asc" : "desc";
+  } else {
+    tipoOrdenacao = "media";
+    direcao = "desc";
+  }
+
+  atualizarIcones(botao);
+  renderTabela();
+}
+
+function atualizarIcones(botaoAtivo) {
+  document.querySelectorAll(".btn-sort").forEach(btn => btn.textContent = "↓");
+  botaoAtivo.textContent = direcao === "desc" ? "↓" : "↑";
 }
 
 function abrirFiltro() {
@@ -321,12 +358,7 @@ function abrirFiltro() {
 
   Object.keys(dadosTecnicos).forEach(nome => {
     const checked = nomesFiltrados.includes(nome) ? "checked" : "";
-
-    lista.innerHTML += `
-      <div>
-        <input type="checkbox" value="${nome}" ${checked}> ${nome}
-      </div>
-    `;
+    lista.innerHTML += `<div><input type="checkbox" value="${nome}" ${checked}> ${nome}</div>`;
   });
 
   modal.style.display = "flex";
@@ -335,7 +367,6 @@ function abrirFiltro() {
 function aplicarFiltro() {
   const checks = document.querySelectorAll("#listaNomes input:checked");
   nomesFiltrados = Array.from(checks).map(c => c.value);
-
   document.getElementById("modalFiltro").style.display = "none";
   renderTabela();
 }
