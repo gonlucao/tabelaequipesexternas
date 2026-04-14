@@ -55,35 +55,26 @@ body {
   font-weight:bold;
 }
 
-/* 🔥 SUBCARDS */
+/* META CARDS */
 .meta-grid {
   display:grid;
   grid-template-columns: repeat(3,1fr);
   gap:10px;
-  width:100%;
   margin-top:10px;
 }
 
 .meta-box {
+  padding:12px;
   border-radius:10px;
-  padding:10px;
-  text-align:center;
   color:white;
+  text-align:center;
 }
 
-.meta-box strong {
-  display:block;
-  font-size:20px;
-}
+.meta-box strong { font-size:20px; display:block; }
 
-.meta-box span {
-  font-size:12px;
-}
-
-/* CORES */
-.meta3 { background:#16a34a; } /* verde */
-.meta2 { background:#f59e0b; } /* amarelo */
-.meta1 { background:#dc2626; } /* vermelho */
+.meta3 { background:#16a34a; }
+.meta2 { background:#f59e0b; }
+.meta1 { background:#dc2626; }
 
 /* TOP 3 */
 .top3 { display:flex; gap:15px; margin-top:20px; }
@@ -205,12 +196,12 @@ tr:hover { background:#f9fafb; }
 <table>
 <thead>
 <tr>
-<th>Técnico <button class="btn-filtro" onclick="abrirFiltro()">Filtrar</button></th>
-<th>Jan <span class="btn-sort" onclick="ordenarMes(0)">⇅</span></th>
-<th>Fev <span class="btn-sort" onclick="ordenarMes(1)">⇅</span></th>
-<th>Mar <span class="btn-sort" onclick="ordenarMes(2)">⇅</span></th>
-<th>Média <span class="btn-sort" onclick="ordenarMedia()">⇅</span></th>
-<th>Status <span class="btn-sort" onclick="ordenarStatus()">⇅</span></th>
+<th>Técnico</th>
+<th>Jan</th>
+<th>Fev</th>
+<th>Mar</th>
+<th>Média</th>
+<th>Status</th>
 </tr>
 </thead>
 <tbody id="tbody"></tbody>
@@ -221,7 +212,6 @@ tr:hover { background:#f9fafb; }
 
 <script>
 let dadosTecnicos = {};
-let direcao = "desc";
 
 const abas = ["1836732217","576248296","1758926410"];
 
@@ -239,6 +229,7 @@ async function carregarDados(){
 
     rows.forEach((r,index)=>{
       if(index===0) return;
+
       let nome = r.c[0]?.v;
       let total = Number(r.c[19]?.v)||0;
 
@@ -246,6 +237,7 @@ async function carregarDados(){
       dadosTecnicos[nome][i]=total;
     });
   }
+
   render();
 }
 
@@ -262,17 +254,58 @@ function getLista(){
 function render(){
   let dados = getLista();
 
+  if(dados.length === 0) return;
+
+  // KPIs
   document.getElementById("totalTec").innerText = dados.length;
   document.getElementById("mediaGeral").innerText =
     (dados.reduce((s,x)=>s+x.m,0)/dados.length).toFixed(1);
 
-  let total = dados.length;
   document.getElementById("meta3").innerText =
-    Math.round((dados.filter(x=>x.k===3).length/total)*100)+"%";
+    Math.round((dados.filter(x=>x.k===3).length/dados.length)*100)+"%";
+
   document.getElementById("meta2").innerText =
-    Math.round((dados.filter(x=>x.k===2).length/total)*100)+"%";
+    Math.round((dados.filter(x=>x.k===2).length/dados.length)*100)+"%";
+
   document.getElementById("meta1").innerText =
-    Math.round((dados.filter(x=>x.k===1).length/total)*100)+"%";
+    Math.round((dados.filter(x=>x.k===1).length/dados.length)*100)+"%";
+
+  // TOP 3
+  let top3=document.getElementById("top3");
+  top3.innerHTML="";
+  const estilos=["gold","silver","bronze"];
+  const medalhas=["🥇","🥈","🥉"];
+
+  dados.slice(0,3).forEach((t,i)=>{
+    top3.innerHTML+=`
+      <div class="top3-card ${estilos[i]}">
+        <div style="font-size:22px">${medalhas[i]}</div>
+        <strong>${t.n}</strong>
+        <div>${t.m.toFixed(1)}</div>
+      </div>`;
+  });
+
+  // TABELA
+  let tbody=document.getElementById("tbody");
+  tbody.innerHTML="";
+
+  dados.forEach(o=>{
+    let linha=`<tr><td>${o.n}</td>`;
+
+    o.v.forEach(x=>{
+      linha+=`<td class="${x>=170?'meta-ok':'meta-bad'}">${x}</td>`;
+    });
+
+    linha+=`<td>${o.m.toFixed(1)}</td>`;
+
+    let s="";
+    ["JAN","FEV","MAR"].forEach((mes,i)=>{
+      s+=`<span class="circulo ${o.v[i]>=170?'verde':'vermelho'}">${mes}</span>`;
+    });
+
+    linha+=`<td>${s}</td></tr>`;
+    tbody.innerHTML+=linha;
+  });
 }
 
 carregarDados();
