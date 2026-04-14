@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard de Técnicos</title>
+  <title>Monitoramento - Metas equipes externa</title>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
@@ -28,6 +28,12 @@
       display: flex;
       align-items: center;
       gap: 15px;
+    }
+
+    .logo {
+      height: 60px;
+      object-fit: contain;
+      border-radius: 8px;
     }
 
     .titulo {
@@ -129,7 +135,8 @@
 
   <div class="topbar">
     <div class="topbar-content">
-      <span class="titulo">Dashboard de Técnicos</span>
+      <img src="https://i.ibb.co/YF0MfYXS/Logo-RBT-Perfil.jpg" class="logo">
+      <span class="titulo">Monitoramento - Metas equipes externa</span>
     </div>
   </div>
 
@@ -229,27 +236,27 @@ function renderTabela() {
     let meses = dadosTecnicos[nome];
     let media = meses.reduce((a, b) => a + b, 0) / meses.length;
 
-    let linha = <tr><td><strong>${nome}</strong></td>;
+    let linha = `<tr><td><strong>${nome}</strong></td>`;
 
     meses.forEach(valor => {
       let classe = valor >= 170 ? "meta-ok" : "meta-bad";
-      linha += <td class="${classe}">${valor}</td>;
+      linha += `<td class="${classe}">${valor}</td>`;
     });
 
-    linha += <td>${media.toFixed(1)}</td>;
+    linha += `<td>${media.toFixed(1)}</td>`;
 
     const mesesLabel = ["JAN","FEV","MAR"];
     let status = "";
 
     meses.forEach((valor, i) => {
       if (valor >= 170) {
-        status += <span class="circulo verde">${mesesLabel[i]}</span>;
+        status += `<span class="circulo verde">${mesesLabel[i]}</span>`;
       } else {
-        status += <span class="circulo vermelho">${mesesLabel[i]}</span>;
+        status += `<span class="circulo vermelho">${mesesLabel[i]}</span>`;
       }
     });
 
-    linha += <td>${status}</td></tr>;
+    linha += `<td>${status}</td></tr>`;
 
     tbody.innerHTML += linha;
   }
@@ -264,11 +271,11 @@ function abrirFiltro() {
   Object.keys(dadosTecnicos).forEach(nome => {
     const checked = nomesFiltrados.includes(nome) ? "checked" : "";
 
-    lista.innerHTML += 
+    lista.innerHTML += `
       <div>
         <input type="checkbox" value="${nome}" ${checked}> ${nome}
       </div>
-    ;
+    `;
   });
 
   modal.style.display = "flex";
