@@ -30,6 +30,7 @@ body {
   padding:25px;
   border-radius:12px;
   width:300px;
+
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -236,10 +237,9 @@ tr:hover { background:#f9fafb; }
   <button onclick="logout()">Sair</button>
 </div>
 
-<!-- MENU -->
 <div class="menu" id="menu">
   <button onclick="trocarPagina(0)">Dashboard</button>
-  <button onclick="abrirRanking()">Metas equipes</button>
+  <button onclick="trocarPagina(1)">ranking.html</button>
 </div>
 
 <!-- DASHBOARD -->
@@ -306,19 +306,7 @@ tr:hover { background:#f9fafb; }
 
 <script>
 
-/* NOVO */
-function abrirRanking(){
-  window.location.href = "ranking.html";
-}
-
-/* AJUSTE */
-function trocarPagina(i){
-  if(i === 0){
-    mostrarPagina(0);
-  }
-}
-
-/* TODO O RESTO DO SEU JS CONTINUA IGUAL */
+/* TODO SEU JS ORIGINAL CONTINUA AQUI SEM ALTERAÇÃO */
 
 </script>
 
