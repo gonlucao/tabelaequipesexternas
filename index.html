@@ -15,6 +15,31 @@ body {
 
 .container { max-width:1200px; margin:auto; }
 
+/* MENU */
+.menu {
+  display:flex;
+  gap:10px;
+  margin-bottom:15px;
+}
+
+.menu button{
+  padding:10px 18px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  background:#e5e7eb;
+  font-weight:600;
+}
+
+.menu button.ativo{
+  background:#dc2626;
+  color:white;
+}
+
+/* PÁGINAS */
+.pagina { display:none; }
+.pagina.ativa { display:block; }
+
 .topbar {
   background: linear-gradient(90deg,#b91c1c,#dc2626);
   padding: 15px 20px;
@@ -64,8 +89,6 @@ body {
   border-radius:14px;
   color:white;
   text-align:center;
-  transition:0.2s;
-  box-shadow:0 4px 10px #00000010;
 }
 
 .meta-box strong {
@@ -140,6 +163,15 @@ tr:hover { background:#f9fafb; }
 
 <div class="container">
 
+<!-- MENU -->
+<div class="menu">
+  <button class="ativo" onclick="trocarPagina(0)">Dashboard</button>
+  <button onclick="trocarPagina(1)">Página 2</button>
+</div>
+
+<!-- PAGINA 1 -->
+<div class="pagina ativa">
+
 <div class="topbar">
   <div class="topbar-content">
     <img src="https://i.ibb.co/rjpBZ8P/Logo-RBT-Perfil.jpg" class="logo">
@@ -147,7 +179,6 @@ tr:hover { background:#f9fafb; }
   </div>
 </div>
 
-<!-- KPIs -->
 <div class="cards">
   <div class="card-kpi">
     <h3>Total Técnicos</h3>
@@ -180,27 +211,32 @@ tr:hover { background:#f9fafb; }
   </div>
 </div>
 
-<!-- TOP 3 -->
 <div class="top3" id="top3"></div>
 
-<!-- TABLE -->
 <div class="card">
 <table>
 <thead>
 <tr>
 <th>Técnico</th>
-
 <th>Jan <span class="btn-sort" onclick="ordenar(0)">⇅</span></th>
 <th>Fev <span class="btn-sort" onclick="ordenar(1)">⇅</span></th>
 <th>Mar <span class="btn-sort" onclick="ordenar(2)">⇅</span></th>
-
 <th>Média <span class="btn-sort" onclick="ordenar(3)">⇅</span></th>
 <th>Status <span class="btn-sort" onclick="ordenar(4)">⇅</span></th>
-
 </tr>
 </thead>
 <tbody id="tbody"></tbody>
 </table>
+</div>
+
+</div>
+
+<!-- PAGINA 2 -->
+<div class="pagina">
+  <div class="card">
+    <h2>Página 2</h2>
+    <p>Aqui você pode colocar outro dashboard, indicadores ou filtros.</p>
+  </div>
 </div>
 
 </div>
@@ -212,6 +248,17 @@ let direcao = 1;
 
 const abas = ["1836732217","576248296","1758926410"];
 
+/* MENU */
+function trocarPagina(index){
+  document.querySelectorAll(".pagina").forEach((p,i)=>{
+    p.classList.toggle("ativa", i===index);
+  });
+
+  document.querySelectorAll(".menu button").forEach((b,i)=>{
+    b.classList.toggle("ativo", i===index);
+  });
+}
+
 async function carregarMes(gid){
   const url = `https://docs.google.com/spreadsheets/d/1KAmeD9jbBX8JssWWeWG3kR03J4zVEjQDx--ojQIFSmg/gviz/tq?tqx=out:json&gid=${gid}`;
   const res = await fetch(url);
@@ -221,19 +268,24 @@ async function carregarMes(gid){
 }
 
 async function carregarDados(){
-  for(let i=0;i<abas.length;i++){
-    let rows = await carregarMes(abas[i]);
+
+  const resultados = await Promise.all(abas.map(gid => carregarMes(gid)));
+
+  resultados.forEach((rows, i) => {
 
     rows.forEach((r,index)=>{
       if(index===0) return;
 
       let nome = r.c[0]?.v;
+      if(!nome) return;
+
       let total = Number(r.c[19]?.v)||0;
 
       if(!dadosTecnicos[nome]) dadosTecnicos[nome]=[0,0,0];
       dadosTecnicos[nome][i]=total;
     });
-  }
+
+  });
 
   montarLista();
   render();
@@ -242,7 +294,6 @@ async function carregarDados(){
 function media(a){ return a.reduce((x,y)=>x+y,0)/a.length; }
 function metas(a){ return a.filter(v=>v>=170).length; }
 
-/* 🔥 LISTA BASE (NUNCA É SOBRESCRITA) */
 function montarLista(){
   lista = Object.keys(dadosTecnicos).map(n=>{
     let v = dadosTecnicos[n];
@@ -250,7 +301,6 @@ function montarLista(){
   }).filter(x=>x.m>=50);
 }
 
-/* 🔥 RENDER PRINCIPAL */
 function render(){
 
   if(lista.length === 0) return;
@@ -273,7 +323,6 @@ function render(){
   renderTop3();
 }
 
-/* 🔥 TOP 3 */
 function renderTop3(){
   let top3=document.getElementById("top3");
   top3.innerHTML="";
@@ -293,7 +342,6 @@ function renderTop3(){
     });
 }
 
-/* 🔥 TABELA */
 function renderTabela(){
   let tbody=document.getElementById("tbody");
   tbody.innerHTML="";
@@ -317,7 +365,6 @@ function renderTabela(){
   });
 }
 
-/* 🔥 ORDENAÇÃO SEGURA (NÃO AFETA OUTRAS FUNÇÕES) */
 function ordenar(col){
 
   direcao = direcao * -1;
