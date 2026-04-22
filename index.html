@@ -102,123 +102,6 @@ body {
 
 .pagina { display:none; }
 .pagina.ativa { display:block; }
-
-.topbar {
-  background: linear-gradient(90deg,#b91c1c,#dc2626);
-  padding:15px;
-  border-radius:12px;
-  color:white;
-}
-
-.topbar-content {
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-
-.logo { height:45px; }
-
-/* KPIs */
-.cards {
-  display:grid;
-  grid-template-columns: repeat(3,1fr);
-  gap:15px;
-  margin-top:20px;
-}
-
-.card-kpi {
-  background:white;
-  padding:20px;
-  border-radius:12px;
-  text-align:center;
-  box-shadow:0 4px 10px #0001;
-}
-
-.card-kpi span {
-  font-size:32px;
-  font-weight:bold;
-}
-
-/* META */
-.meta-grid {
-  display:grid;
-  grid-template-columns: repeat(3,1fr);
-  gap:12px;
-  margin-top:12px;
-}
-
-.meta-box {
-  padding:18px;
-  border-radius:14px;
-  color:white;
-  text-align:center;
-}
-
-.meta-box strong {
-  font-size:30px;
-  display:block;
-}
-
-.meta3 { background:#16a34a; }
-.meta2 { background:#f59e0b; }
-.meta1 { background:#dc2626; }
-
-/* TOP 3 */
-.top3 { display:flex; gap:15px; margin-top:20px; }
-
-.top3-card {
-  flex:1;
-  background:white;
-  padding:15px;
-  border-radius:12px;
-  text-align:center;
-  box-shadow:0 4px 10px #0001;
-}
-
-/* TABLE */
-.card {
-  background:white;
-  padding:20px;
-  border-radius:16px;
-  margin-top:20px;
-}
-
-table { width:100%; border-collapse:collapse; }
-
-th,td {
-  padding:10px;
-  border-bottom:1px solid #eee;
-  text-align:center;
-}
-
-th:first-child,td:first-child { text-align:left; }
-
-tr:hover { background:#f9fafb; }
-
-.meta-ok{color:#16a34a;font-weight:bold;}
-.meta-bad{color:#dc2626;}
-
-.circulo{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:28px;
-  height:28px;
-  border-radius:50%;
-  font-size:9px;
-  color:white;
-  margin-right:3px;
-}
-
-.verde{background:#16a34a;}
-.vermelho{background:#dc2626;}
-
-.btn-sort {
-  cursor:pointer;
-  margin-left:6px;
-  font-size:12px;
-  color:#555;
-}
 </style>
 </head>
 
@@ -259,48 +142,66 @@ tr:hover { background:#f9fafb; }
   <button onclick="logout()">Sair</button>
 </div>
 
-<div class="menu" id="menu">
+<div class="menu">
   <button onclick="trocarPagina(0)">Dashboard</button>
   <button onclick="trocarPagina(1)">Metas equipes</button>
 </div>
 
-<div class="pagina" id="p1"></div>
-<div class="pagina" id="p2"><div class="card"><h2>Metas equipes</h2></div></div>
+<div class="pagina" id="p1">
+  <h2>Dashboard</h2>
+</div>
+
+<div class="pagina" id="p2">
+  <h2>Metas equipes</h2>
+</div>
 
 </div>
 
 <script>
 
-/* LOGIN */
-async function login(){
-  let u = user.value;
-  let p = pass.value;
+const API_URL = "https://script.google.com/macros/s/AKfycbydC82xbEs7KD4MZcwxyxXX6ahBJKWN9QYKqZ_DV_OZH96EsG1JyyomJNjd3GpwWe2N/exec";
 
-  try{
-    const url = "https://script.google.com/macros/s/AKfycbydC82xbEs7KD4MZcwxyxXX6ahBJKWN9QYKqZ_DV_OZH96EsG1JyyomJNjd3GpwWe2N/exec";
-    const res = await fetch(`${url}?user=${u}&pass=${p}`);
+/* LOGIN FUNCIONANDO */
+async function login(){
+
+  let u = document.getElementById("user").value;
+  let p = document.getElementById("pass").value;
+
+  if(!u || !p){
+    return erro("Preencha usuário e senha");
+  }
+
+  try {
+
+    const res = await fetch(`${API_URL}?user=${encodeURIComponent(u)}&pass=${encodeURIComponent(p)}`);
     const text = await res.text();
-    const data = JSON.parse(text);
+
+    let data;
+
+    try{
+      data = JSON.parse(text);
+    }catch{
+      console.log("Resposta inválida:", text);
+      return erro("Erro na resposta do servidor");
+    }
 
     if(data.status){
       localStorage.setItem("logado", JSON.stringify(data));
       aplicarLogin(data);
     }else{
-      erro("Login inválido");
+      erro("Usuário ou senha inválidos");
     }
-  }catch{
+
+  } catch(e){
+    console.error(e);
     erro("Erro ao conectar com servidor");
   }
 }
 
-function toggleCadastro(){
-  cadastroBox.style.display =
-    cadastroBox.style.display === "block" ? "none" : "block";
-}
-
 function aplicarLogin(user){
-  loginBox.style.display="none";
-  usuarioLogado.innerText = `👤 ${user.nome}`;
+  document.getElementById("loginBox").style.display="none";
+  document.getElementById("usuarioLogado").innerText = "👤 " + user.nome;
+  mostrarPagina(0);
 }
 
 function logout(){
@@ -311,6 +212,28 @@ function logout(){
 function erro(msg){
   document.getElementById("erro").innerText = msg;
 }
+
+function toggleCadastro(){
+  let box = document.getElementById("cadastroBox");
+  box.style.display = box.style.display === "block" ? "none" : "block";
+}
+
+function trocarPagina(i){
+  mostrarPagina(i);
+}
+
+function mostrarPagina(i){
+  document.querySelectorAll(".pagina").forEach((p,index)=>{
+    p.classList.toggle("ativa", index===i);
+  });
+}
+
+window.onload = () => {
+  let logado = JSON.parse(localStorage.getItem("logado"));
+  if(logado){
+    aplicarLogin(logado);
+  }
+};
 
 </script>
 
