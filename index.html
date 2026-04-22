@@ -277,7 +277,7 @@ async function login(){
   let p = pass.value;
 
   try{
-    const url = "COLE_SUA_URL_AQUI";
+    const url = "https://script.google.com/macros/s/AKfycbydC82xbEs7KD4MZcwxyxXX6ahBJKWN9QYKqZ_DV_OZH96EsG1JyyomJNjd3GpwWe2N/exec";
     const res = await fetch(`${url}?user=${u}&pass=${p}`);
     const text = await res.text();
     const data = JSON.parse(text);
