@@ -7,7 +7,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-/* ================= LOGIN ================= */
+body {
+  font-family: 'Inter';
+  background:#f5f7fb;
+  padding:20px;
+}
+
+/* LOGIN */
 .login-overlay{
   position:fixed;
   width:100%;
@@ -46,15 +52,7 @@
   cursor:pointer;
 }
 
-.cadastro{ display:none; }
-
-/* ================= SUA DASH ORIGINAL ================= */
-body {
-  font-family: 'Inter';
-  background:#f5f7fb;
-  padding:20px;
-}
-
+/* DASH */
 .container { max-width:1200px; margin:auto; }
 
 .topbar {
@@ -72,6 +70,7 @@ body {
 
 .logo { height:45px; }
 
+/* KPIs */
 .cards {
   display:grid;
   grid-template-columns: repeat(3,1fr);
@@ -84,7 +83,6 @@ body {
   padding:20px;
   border-radius:12px;
   text-align:center;
-  box-shadow:0 4px 10px #0001;
 }
 
 .card-kpi span {
@@ -92,34 +90,7 @@ body {
   font-weight:bold;
 }
 
-.meta-grid {
-  display:grid;
-  grid-template-columns: repeat(3,1fr);
-  gap:12px;
-  margin-top:12px;
-}
-
-.meta-box {
-  padding:18px;
-  border-radius:14px;
-  color:white;
-  text-align:center;
-}
-
-.meta3 { background:#16a34a; }
-.meta2 { background:#f59e0b; }
-.meta1 { background:#dc2626; }
-
-.top3 { display:flex; gap:15px; margin-top:20px; }
-
-.top3-card {
-  flex:1;
-  background:white;
-  padding:15px;
-  border-radius:12px;
-  text-align:center;
-}
-
+/* TABLE */
 .card {
   background:white;
   padding:20px;
@@ -136,9 +107,6 @@ th,td {
 }
 
 th:first-child,td:first-child { text-align:left; }
-
-.meta-ok{color:#16a34a;font-weight:bold;}
-.meta-bad{color:#dc2626;}
 </style>
 </head>
 
@@ -158,11 +126,12 @@ th:first-child,td:first-child { text-align:left; }
   </div>
 </div>
 
-<!-- DASH ORIGINAL (NÃO ALTERADA) -->
+<!-- DASH -->
 <div class="container" id="dashboard" style="display:none;">
 
 <div class="topbar">
   <div class="topbar-content">
+    <img src="https://i.ibb.co/rjpBZ8P/Logo-RBT-Perfil.jpg" class="logo">
     <span>Monitoramento - Metas equipes externa</span>
   </div>
 </div>
@@ -180,15 +149,9 @@ th:first-child,td:first-child { text-align:left; }
 
   <div class="card-kpi">
     <h3>Consistência</h3>
-    <div class="meta-grid">
-      <div class="meta-box meta3"><strong id="meta3">0%</strong></div>
-      <div class="meta-box meta2"><strong id="meta2">0%</strong></div>
-      <div class="meta-box meta1"><strong id="meta1">0%</strong></div>
-    </div>
+    <span id="meta3">0%</span>
   </div>
 </div>
-
-<div class="top3" id="top3"></div>
 
 <div class="card">
 <table>
@@ -209,9 +172,10 @@ th:first-child,td:first-child { text-align:left; }
 
 <script>
 
-/* ================= LOGIN ================= */
+/* API */
 const API_URL = "https://script.google.com/macros/s/AKfycbydC82xbEs7KD4MZcwxyxXX6ahBJKWN9QYKqZ_DV_OZH96EsG1JyyomJNjd3GpwWe2N/exec";
 
+/* LOGIN */
 async function login(){
   let u = user.value;
   let p = pass.value;
@@ -232,7 +196,7 @@ function erro(msg){
   document.getElementById("erro").innerText = msg;
 }
 
-/* ================= DASH ORIGINAL ================= */
+/* DASH */
 let dadosTecnicos = {};
 let lista = [];
 
@@ -247,6 +211,8 @@ async function carregarMes(gid){
 }
 
 async function carregarDados(){
+  dadosTecnicos = {};
+
   for(let i=0;i<abas.length;i++){
     let rows = await carregarMes(abas[i]);
 
@@ -271,8 +237,22 @@ async function carregarDados(){
 
 function render(){
   totalTec.innerText = lista.length;
+
   mediaGeral.innerText =
     (lista.reduce((s,x)=>s+x.m,0)/lista.length).toFixed(1);
+
+  renderTabela();
+}
+
+function renderTabela(){
+  tbody.innerHTML="";
+
+  lista.forEach(o=>{
+    let linha=`<tr><td>${o.n}</td>`;
+    o.v.forEach(x=> linha+=`<td>${x}</td>`);
+    linha+=`<td>${o.m.toFixed(1)}</td></tr>`;
+    tbody.innerHTML+=linha;
+  });
 }
 
 </script>
