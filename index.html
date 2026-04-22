@@ -13,6 +13,8 @@ body {
   padding:20px;
 }
 
+.container { max-width:1200px; margin:auto; }
+
 /* LOGIN */
 .login-overlay{
   position:fixed;
@@ -39,7 +41,6 @@ body {
   margin-top:10px;
   border-radius:8px;
   border:1px solid #ccc;
-  box-sizing:border-box;
 }
 
 .btn-padrao{
@@ -51,7 +52,6 @@ body {
   border:none;
   border-radius:8px;
   cursor:pointer;
-  font-weight:600;
 }
 
 .btn-sec{
@@ -59,10 +59,7 @@ body {
   color:#333;
 }
 
-.cadastro{
-  display:none;
-  margin-top:10px;
-}
+.cadastro{ display:none; }
 
 /* USER BAR */
 .user-bar{
@@ -72,36 +69,82 @@ body {
   margin-bottom:10px;
 }
 
-.user-bar button{
-  background:#dc2626;
-  color:white;
-  border:none;
-  padding:6px 10px;
-  border-radius:6px;
-  cursor:pointer;
-}
-
-.container { max-width:1200px; margin:auto; }
-
 /* MENU */
-.menu { display:flex; gap:10px; margin-bottom:15px; }
+.menu{
+  display:flex;
+  gap:10px;
+  margin-bottom:15px;
+}
 
 .menu button{
-  padding:10px 18px;
+  padding:10px 15px;
   border:none;
-  border-radius:10px;
+  border-radius:8px;
   cursor:pointer;
-  background:#e5e7eb;
-  font-weight:600;
 }
 
-.menu button.ativo{
+.menu .ativo{
   background:#dc2626;
   color:white;
 }
 
-.pagina { display:none; }
-.pagina.ativa { display:block; }
+/* DASHBOARD */
+.topbar{
+  background:#dc2626;
+  color:white;
+  padding:15px;
+  border-radius:10px;
+}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:15px;
+}
+
+.card-kpi{
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  text-align:center;
+}
+
+.meta-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:5px;
+}
+
+.meta-box{ padding:10px; border-radius:8px; color:white; }
+.meta3{background:green;}
+.meta2{background:orange;}
+.meta1{background:red;}
+
+.top3{ display:flex; gap:10px; margin-top:15px; }
+
+.card{
+  background:white;
+  padding:15px;
+  margin-top:15px;
+  border-radius:10px;
+}
+
+table{ width:100%; border-collapse:collapse; }
+
+th,td{
+  padding:8px;
+  border-bottom:1px solid #ddd;
+  text-align:center;
+}
+
+th:first-child,td:first-child{ text-align:left; }
+
+.meta-ok{color:green;}
+.meta-bad{color:red;}
+
+.pagina{ display:none; }
+.ativa{ display:block; }
 </style>
 </head>
 
@@ -112,26 +155,19 @@ body {
   <div class="login-box">
     <h3>Login</h3>
 
-    <input class="input-padrao" type="text" id="user" placeholder="Usuário">
-    <input class="input-padrao" type="password" id="pass" placeholder="Senha">
+    <input class="input-padrao" id="user" placeholder="Usuário">
+    <input class="input-padrao" id="pass" type="password" placeholder="Senha">
 
     <button class="btn-padrao" onclick="login()">Entrar</button>
-
     <button class="btn-padrao btn-sec" onclick="toggleCadastro()">Criar conta</button>
 
     <div class="cadastro" id="cadastroBox">
-      <input class="input-padrao" type="text" id="newUser" placeholder="Novo usuário">
-      <input class="input-padrao" type="password" id="newPass" placeholder="Senha">
-
-      <select class="input-padrao" id="perfil">
-        <option value="supervisor">Supervisor</option>
-        <option value="equipe">Equipe</option>
-      </select>
-
-      <button class="btn-padrao" onclick="cadastrar()">Cadastrar</button>
+      <input class="input-padrao" placeholder="Novo usuário">
+      <input class="input-padrao" placeholder="Senha">
+      <button class="btn-padrao">Cadastrar</button>
     </div>
 
-    <p id="erro" style="color:red;font-size:12px;"></p>
+    <p id="erro" style="color:red;"></p>
   </div>
 </div>
 
@@ -147,12 +183,48 @@ body {
   <button onclick="trocarPagina(1)">Metas equipes</button>
 </div>
 
+<!-- DASHBOARD -->
 <div class="pagina" id="p1">
-  <h2>Dashboard</h2>
+
+<div class="topbar">Monitoramento - Metas equipes externa</div>
+
+<div class="cards">
+  <div class="card-kpi">Total Técnicos <br><span id="totalTec">0</span></div>
+  <div class="card-kpi">Média Geral <br><span id="mediaGeral">0</span></div>
+  <div class="card-kpi">
+    Consistência
+    <div class="meta-grid">
+      <div class="meta-box meta3"><span id="meta3">0%</span></div>
+      <div class="meta-box meta2"><span id="meta2">0%</span></div>
+      <div class="meta-box meta1"><span id="meta1">0%</span></div>
+    </div>
+  </div>
 </div>
 
+<div class="top3" id="top3"></div>
+
+<div class="card">
+<table>
+<thead>
+<tr>
+<th>Técnico</th>
+<th>Jan</th>
+<th>Fev</th>
+<th>Mar</th>
+<th>Média</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+</div>
+
+</div>
+
+<!-- PAGINA 2 -->
 <div class="pagina" id="p2">
-  <h2>Metas equipes</h2>
+  <div class="card">
+    <h2>Metas equipes</h2>
+  </div>
 </div>
 
 </div>
@@ -161,47 +233,31 @@ body {
 
 const API_URL = "https://script.google.com/macros/s/AKfycbydC82xbEs7KD4MZcwxyxXX6ahBJKWN9QYKqZ_DV_OZH96EsG1JyyomJNjd3GpwWe2N/exec";
 
-/* LOGIN FUNCIONANDO */
+/* LOGIN */
 async function login(){
+  let u = user.value;
+  let p = pass.value;
 
-  let u = document.getElementById("user").value;
-  let p = document.getElementById("pass").value;
-
-  if(!u || !p){
-    return erro("Preencha usuário e senha");
-  }
-
-  try {
-
-    const res = await fetch(`${API_URL}?user=${encodeURIComponent(u)}&pass=${encodeURIComponent(p)}`);
-    const text = await res.text();
-
-    let data;
-
-    try{
-      data = JSON.parse(text);
-    }catch{
-      console.log("Resposta inválida:", text);
-      return erro("Erro na resposta do servidor");
-    }
+  try{
+    let res = await fetch(`${API_URL}?user=${u}&pass=${p}`);
+    let data = await res.json();
 
     if(data.status){
       localStorage.setItem("logado", JSON.stringify(data));
       aplicarLogin(data);
     }else{
-      erro("Usuário ou senha inválidos");
+      erro("Login inválido");
     }
-
-  } catch(e){
-    console.error(e);
-    erro("Erro ao conectar com servidor");
+  }catch{
+    erro("Erro ao conectar");
   }
 }
 
 function aplicarLogin(user){
-  document.getElementById("loginBox").style.display="none";
-  document.getElementById("usuarioLogado").innerText = "👤 " + user.nome;
+  loginBox.style.display="none";
+  usuarioLogado.innerText = "👤 "+user.nome;
   mostrarPagina(0);
+  carregarDados();
 }
 
 function logout(){
@@ -214,8 +270,8 @@ function erro(msg){
 }
 
 function toggleCadastro(){
-  let box = document.getElementById("cadastroBox");
-  box.style.display = box.style.display === "block" ? "none" : "block";
+  cadastroBox.style.display =
+    cadastroBox.style.display==="block"?"none":"block";
 }
 
 function trocarPagina(i){
@@ -225,6 +281,71 @@ function trocarPagina(i){
 function mostrarPagina(i){
   document.querySelectorAll(".pagina").forEach((p,index)=>{
     p.classList.toggle("ativa", index===i);
+  });
+}
+
+/* DASHBOARD ORIGINAL */
+let dadosTecnicos = {};
+let lista = [];
+
+const abas = ["1836732217","576248296","1758926410"];
+
+async function carregarMes(gid){
+  const url = `https://docs.google.com/spreadsheets/d/1KAmeD9jbBX8JssWWeWG3kR03J4zVEjQDx--ojQIFSmg/gviz/tq?tqx=out:json&gid=${gid}`;
+  const res = await fetch(url);
+  const text = await res.text();
+  const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}")+1));
+  return json.table.rows;
+}
+
+async function carregarDados(){
+  dadosTecnicos = {};
+
+  for(let i=0;i<abas.length;i++){
+    let rows = await carregarMes(abas[i]);
+
+    rows.forEach((r,index)=>{
+      if(index===0) return;
+
+      let nome = r.c[0]?.v;
+      let total = Number(r.c[19]?.v)||0;
+
+      if(!dadosTecnicos[nome]) dadosTecnicos[nome]=[0,0,0];
+      dadosTecnicos[nome][i]=total;
+    });
+  }
+
+  montarLista();
+  render();
+}
+
+function media(a){ return a.reduce((x,y)=>x+y,0)/a.length; }
+
+function montarLista(){
+  lista = Object.keys(dadosTecnicos).map(n=>{
+    let v = dadosTecnicos[n];
+    return {n,v,m:media(v)};
+  });
+}
+
+function render(){
+
+  totalTec.innerText = lista.length;
+
+  mediaGeral.innerText =
+    (lista.reduce((s,x)=>s+x.m,0)/lista.length).toFixed(1);
+
+  renderTabela();
+}
+
+function renderTabela(){
+  tbody.innerHTML="";
+
+  lista.forEach(o=>{
+    let linha=`<tr><td>${o.n}</td>`;
+    o.v.forEach(x=> linha+=`<td>${x}</td>`);
+    linha+=`<td>${o.m.toFixed(1)}</td></tr>`;
+    tbody.innerHTML+=linha;
   });
 }
 
