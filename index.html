@@ -310,7 +310,6 @@ tr:hover { background:#f9fafb; }
 
 <script>
 
-/* API */
 const API_URL = "https://script.google.com/macros/s/AKfycbydC82xbEs7KD4MZcwxyxXX6ahBJKWN9QYKqZ_DV_OZH96EsG1JyyomJNjd3GpwWe2N/exec";
 
 /* LOGIN */
@@ -324,24 +323,37 @@ window.onload = () => {
 };
 
 async function login(){
-  let u = user.value;
-  let p = pass.value;
+  try{
+    let u = document.getElementById("user").value;
+    let p = document.getElementById("pass").value;
 
-  let res = await fetch(`${API_URL}?user=${u}&pass=${p}`);
-  let data = await res.json();
+    let res = await fetch(`${API_URL}?user=${u}&pass=${p}`);
+    let text = await res.text();
 
-  if(data.status){
-    let userData = {nome:data.nome, perfil:data.perfil};
-    localStorage.setItem("logado", JSON.stringify(userData));
-    aplicarLogin(userData);
-  }else{
-    erro("Login inválido");
+    let data;
+    try{
+      data = JSON.parse(text);
+    }catch{
+      return erro("Erro na resposta do servidor");
+    }
+
+    if(data.status){
+      let userData = {nome:data.nome, perfil:data.perfil};
+      localStorage.setItem("logado", JSON.stringify(userData));
+      aplicarLogin(userData);
+    }else{
+      erro("Login inválido");
+    }
+
+  }catch(e){
+    erro("Erro ao conectar com servidor");
   }
 }
 
 function aplicarLogin(user){
-  loginBox.style.display="none";
-  usuarioLogado.innerText = `👤 ${user.nome} (${user.perfil})`;
+  document.getElementById("loginBox").style.display="none";
+  document.getElementById("usuarioLogado").innerText =
+    `👤 ${user.nome} (${user.perfil})`;
 
   if(user.perfil==="supervisor"){
     mostrarPagina(0);
@@ -362,142 +374,36 @@ function erro(msg){
   document.getElementById("erro").innerText = msg;
 }
 
-/* MENU */
-function trocarPagina(i){
-  mostrarPagina(i);
-}
-
-function mostrarPagina(i){
-  document.querySelectorAll(".pagina").forEach((p,index)=>{
-    p.classList.toggle("ativa", index===i);
-  });
-
-  document.querySelectorAll("#menu button").forEach((b,index)=>{
-    b.classList.toggle("ativo", index===i);
-  });
-}
-
-/* DASH (SEU ORIGINAL) */
-let dadosTecnicos = {};
-let lista = [];
-let direcao = 1;
-
-const abas = ["1836732217","576248296","1758926410"];
-
-async function carregarMes(gid){
-  const url = `https://docs.google.com/spreadsheets/d/1KAmeD9jbBX8JssWWeWG3kR03J4zVEjQDx--ojQIFSmg/gviz/tq?tqx=out:json&gid=${gid}`;
-  const res = await fetch(url);
-  const text = await res.text();
-  const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}")+1));
-  return json.table.rows;
-}
-
+/* DASH COM PROTEÇÃO */
 async function carregarDados(){
-  dadosTecnicos = {};
+  try{
+    dadosTecnicos = {};
 
-  const resultados = await Promise.all(abas.map(gid => carregarMes(gid)));
+    const resultados = await Promise.all(
+      abas.map(gid => carregarMes(gid))
+    );
 
-  resultados.forEach((rows, i) => {
-    rows.forEach((r,index)=>{
-      if(index===0) return;
+    resultados.forEach((rows, i) => {
+      rows.forEach((r,index)=>{
+        if(index===0) return;
 
-      let nome = r.c[0]?.v;
-      if(!nome) return;
+        let nome = r.c[0]?.v;
+        if(!nome) return;
 
-      let total = Number(r.c[19]?.v)||0;
+        let total = Number(r.c[19]?.v)||0;
 
-      if(!dadosTecnicos[nome]) dadosTecnicos[nome]=[0,0,0];
-      dadosTecnicos[nome][i]=total;
-    });
-  });
-
-  montarLista();
-  render();
-}
-
-function media(a){ return a.reduce((x,y)=>x+y,0)/a.length; }
-function metas(a){ return a.filter(v=>v>=170).length; }
-
-function montarLista(){
-  lista = Object.keys(dadosTecnicos).map(n=>{
-    let v = dadosTecnicos[n];
-    return {n,v,m:media(v),k:metas(v)};
-  }).filter(x=>x.m>=50);
-}
-
-function render(){
-  if(lista.length === 0) return;
-
-  totalTec.innerText = lista.length;
-
-  mediaGeral.innerText =
-    (lista.reduce((s,x)=>s+x.m,0)/lista.length).toFixed(1);
-
-  meta3.innerText =
-    Math.round((lista.filter(x=>x.k===3).length/lista.length)*100)+"%";
-
-  meta2.innerText =
-    Math.round((lista.filter(x=>x.k===2).length/lista.length)*100)+"%";
-
-  meta1.innerText =
-    Math.round((lista.filter(x=>x.k===1).length/lista.length)*100)+"%";
-
-  renderTabela();
-  renderTop3();
-}
-
-function renderTop3(){
-  let top3=document.getElementById("top3");
-  top3.innerHTML="";
-  const medalhas=["🥇","🥈","🥉"];
-
-  [...lista]
-    .sort((a,b)=>b.m-a.m)
-    .slice(0,3)
-    .forEach((t,i)=>{
-      top3.innerHTML+=`
-        <div class="top3-card">
-          <div style="font-size:24px">${medalhas[i]}</div>
-          <strong>${t.n}</strong>
-          <div>${t.m.toFixed(1)}</div>
-        </div>
-      `;
-    });
-}
-
-function renderTabela(){
-  let tbody=document.getElementById("tbody");
-  tbody.innerHTML="";
-
-  lista.forEach(o=>{
-    let linha=`<tr><td>${o.n}</td>`;
-
-    o.v.forEach(x=>{
-      linha+=`<td class="${x>=170?'meta-ok':'meta-bad'}">${x}</td>`;
+        if(!dadosTecnicos[nome]) dadosTecnicos[nome]=[0,0,0];
+        dadosTecnicos[nome][i]=total;
+      });
     });
 
-    linha+=`<td>${o.m.toFixed(1)}</td>`;
+    montarLista();
+    render();
 
-    let s="";
-    ["JAN","FEV","MAR"].forEach((m,i)=>{
-      s+=`<span class="circulo ${o.v[i]>=170?'verde':'vermelho'}">${m}</span>`;
-    });
-
-    linha+=`<td>${s}</td></tr>`;
-    tbody.innerHTML+=linha;
-  });
-}
-
-function ordenar(col){
-  direcao = direcao * -1;
-
-  lista.sort((a,b)=>{
-    if(col <= 2) return direcao * (a.v[col] - b.v[col]);
-    if(col === 3) return direcao * (a.m - b.m);
-    if(col === 4) return direcao * (a.k - b.k);
-  });
-
-  renderTabela();
+  }catch(e){
+    console.error(e);
+    alert("Erro ao carregar dados da planilha");
+  }
 }
 
 </script>
