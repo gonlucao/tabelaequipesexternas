@@ -1,5 +1,3 @@
-<!-- SOMENTE O SCRIPT FOI ALTERADO — TODO RESTO PERMANECE IGUAL -->
-
 <script>
 
 /* ================= API ================= */
@@ -16,8 +14,8 @@ window.onload = () => {
 /* ================= LOGIN ================= */
 async function login(){
 
-  let u = user.value;
-  let p = pass.value;
+  let u = document.getElementById("user").value;
+  let p = document.getElementById("pass").value;
 
   if(!u || !p){
     return erro("Preencha usuário e senha");
@@ -58,17 +56,13 @@ async function login(){
   }
 }
 
-/* ================= CADASTRO (LOCAL - FUTURO VAMOS INTEGRAR) ================= */
-function cadastrar(){
-  erro("Cadastro via planilha ainda não ativado");
-}
-
-/* ================= LOGIN APLICADO ================= */
+/* ================= APLICA LOGIN ================= */
 function aplicarLogin(user){
 
-  loginBox.style.display="none";
+  document.getElementById("loginBox").style.display="none";
 
-  usuarioLogado.innerText = `👤 ${user.nome} (${user.perfil})`;
+  document.getElementById("usuarioLogado").innerText =
+    `👤 ${user.nome} (${user.perfil})`;
 
   if(user.perfil === "supervisor"){
     mostrarPagina(0);
@@ -76,6 +70,9 @@ function aplicarLogin(user){
     mostrarPagina(1);
     document.querySelectorAll("#menu button")[0].style.display="none";
   }
+
+  // 🔥 ESSA LINHA RESOLVE A TELA BRANCA
+  carregarDados();
 }
 
 /* ================= LOGOUT ================= */
@@ -103,7 +100,7 @@ function mostrarPagina(i){
   });
 }
 
-/* ================= DASHBOARD ORIGINAL (INALTERADO) ================= */
+/* ================= DASHBOARD ================= */
 
 let dadosTecnicos = {};
 let lista = [];
@@ -120,6 +117,8 @@ async function carregarMes(gid){
 }
 
 async function carregarDados(){
+
+  dadosTecnicos = {}; // 🔥 evita duplicação
 
   const resultados = await Promise.all(abas.map(gid => carregarMes(gid)));
 
@@ -157,18 +156,18 @@ function render(){
 
   if(lista.length === 0) return;
 
-  totalTec.innerText = lista.length;
+  document.getElementById("totalTec").innerText = lista.length;
 
-  mediaGeral.innerText =
+  document.getElementById("mediaGeral").innerText =
     (lista.reduce((s,x)=>s+x.m,0)/lista.length).toFixed(1);
 
-  meta3.innerText =
+  document.getElementById("meta3").innerText =
     Math.round((lista.filter(x=>x.k===3).length/lista.length)*100)+"%";
 
-  meta2.innerText =
+  document.getElementById("meta2").innerText =
     Math.round((lista.filter(x=>x.k===2).length/lista.length)*100)+"%";
 
-  meta1.innerText =
+  document.getElementById("meta1").innerText =
     Math.round((lista.filter(x=>x.k===1).length/lista.length)*100)+"%";
 
   renderTabela();
@@ -240,7 +239,5 @@ function ordenar(col){
 
   renderTabela();
 }
-
-carregarDados();
 
 </script>
