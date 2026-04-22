@@ -41,7 +41,6 @@ body {
   border-radius:10px;
   border:1px solid #ccc;
   box-sizing:border-box;
-  font-size:14px;
 }
 
 .login-box button{
@@ -54,11 +53,6 @@ body {
   color:white;
   font-weight:600;
   cursor:pointer;
-  transition:0.2s;
-}
-
-.login-box button:hover{
-  background:#b91c1c;
 }
 
 /* USER BAR */
@@ -129,48 +123,11 @@ body {
   padding:20px;
   border-radius:12px;
   text-align:center;
-  box-shadow:0 4px 10px #0001;
 }
 
 .card-kpi span {
   font-size:32px;
   font-weight:bold;
-}
-
-/* META */
-.meta-grid {
-  display:grid;
-  grid-template-columns: repeat(3,1fr);
-  gap:12px;
-  margin-top:12px;
-}
-
-.meta-box {
-  padding:18px;
-  border-radius:14px;
-  color:white;
-  text-align:center;
-}
-
-.meta-box strong {
-  font-size:30px;
-  display:block;
-}
-
-.meta3 { background:#16a34a; }
-.meta2 { background:#f59e0b; }
-.meta1 { background:#dc2626; }
-
-/* TOP 3 */
-.top3 { display:flex; gap:15px; margin-top:20px; }
-
-.top3-card {
-  flex:1;
-  background:white;
-  padding:15px;
-  border-radius:12px;
-  text-align:center;
-  box-shadow:0 4px 10px #0001;
 }
 
 /* TABLE */
@@ -190,33 +147,6 @@ th,td {
 }
 
 th:first-child,td:first-child { text-align:left; }
-
-tr:hover { background:#f9fafb; }
-
-.meta-ok{color:#16a34a;font-weight:bold;}
-.meta-bad{color:#dc2626;}
-
-.circulo{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:28px;
-  height:28px;
-  border-radius:50%;
-  font-size:9px;
-  color:white;
-  margin-right:3px;
-}
-
-.verde{background:#16a34a;}
-.vermelho{background:#dc2626;}
-
-.btn-sort {
-  cursor:pointer;
-  margin-left:6px;
-  font-size:12px;
-  color:#555;
-}
 </style>
 </head>
 
@@ -248,7 +178,6 @@ tr:hover { background:#f9fafb; }
   <button onclick="trocarPagina(1)">Metas equipes</button>
 </div>
 
-<!-- DASHBOARD -->
 <div class="pagina ativa" id="p1">
 
 <div class="topbar">
@@ -258,4 +187,86 @@ tr:hover { background:#f9fafb; }
   </div>
 </div>
 
-<!-- RESTANTE DA DASH SEGUE IGUAL (SEM ALTERAÇÃO) -->
+<div class="card">
+  <h3>Dashboard carregado</h3>
+</div>
+
+</div>
+
+<div class="pagina" id="p2">
+  <div class="card">
+    <h2>Metas equipes</h2>
+  </div>
+</div>
+
+</div>
+
+<script>
+
+const API_URL = "https://script.google.com/macros/s/AKfycbydC82xbEs7KD4MZcwxyxXX6ahBJKWN9QYKqZ_DV_OZH96EsG1JyyomJNjd3GpwWe2N/exec";
+
+window.onload = () => {
+  let logado = JSON.parse(localStorage.getItem("logado"));
+  if(logado){
+    aplicarLogin(logado);
+  } else {
+    mostrarPagina(0);
+  }
+};
+
+async function login(){
+
+  let u = document.getElementById("user").value;
+  let p = document.getElementById("pass").value;
+
+  try{
+    let res = await fetch(`${API_URL}?user=${u}&pass=${p}`);
+    let data = await res.json();
+
+    if(data.status){
+      localStorage.setItem("logado", JSON.stringify(data));
+      aplicarLogin(data);
+    }else{
+      erro("Login inválido");
+    }
+
+  }catch(e){
+    erro("Erro de conexão");
+  }
+}
+
+function aplicarLogin(user){
+  document.getElementById("loginBox").style.display="none";
+  document.getElementById("usuarioLogado").innerText =
+    `👤 ${user.nome} (${user.perfil})`;
+
+  mostrarPagina(0);
+}
+
+function logout(){
+  localStorage.removeItem("logado");
+  location.reload();
+}
+
+function erro(msg){
+  document.getElementById("erro").innerText = msg;
+}
+
+function trocarPagina(i){
+  mostrarPagina(i);
+}
+
+function mostrarPagina(i){
+  document.querySelectorAll(".pagina").forEach((p,index)=>{
+    p.classList.toggle("ativa", index===i);
+  });
+
+  document.querySelectorAll("#menu button").forEach((b,index)=>{
+    b.classList.toggle("ativo", index===i);
+  });
+}
+
+</script>
+
+</body>
+</html>
