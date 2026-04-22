@@ -264,70 +264,54 @@ tr:hover { background:#f9fafb; }
   <button onclick="trocarPagina(1)">Metas equipes</button>
 </div>
 
-<!-- DASHBOARD -->
-<div class="pagina" id="p1">
-<!-- (conteúdo mantido igual) -->
-</div>
-
-<!-- PAGINA 2 -->
-<div class="pagina" id="p2">
-  <div class="card">
-    <h2>Metas equipes</h2>
-  </div>
-</div>
+<div class="pagina" id="p1"></div>
+<div class="pagina" id="p2"><div class="card"><h2>Metas equipes</h2></div></div>
 
 </div>
 
 <script>
 
-/* LOGIN VIA API - CORRIGIDO */
+/* LOGIN */
 async function login(){
+  let u = user.value;
+  let p = pass.value;
 
-  let u = document.getElementById("user").value;
-  let p = document.getElementById("pass").value;
-
-  if(!u || !p){
-    return erro("Preencha usuário e senha");
-  }
-
-  try {
-
+  try{
     const url = "COLE_SUA_URL_AQUI";
-
-    const res = await fetch(`${url}?user=${encodeURIComponent(u)}&pass=${encodeURIComponent(p)}`);
-
+    const res = await fetch(`${url}?user=${u}&pass=${p}`);
     const text = await res.text();
-
-    let data;
-
-    try {
-      data = JSON.parse(text);
-    } catch {
-      console.log("Resposta não JSON:", text);
-      return erro("Erro na resposta do servidor");
-    }
+    const data = JSON.parse(text);
 
     if(data.status){
-
-      let userData = {
-        nome: data.nome,
-        perfil: data.perfil
-      };
-
-      localStorage.setItem("logado", JSON.stringify(userData));
-      aplicarLogin(userData);
-
+      localStorage.setItem("logado", JSON.stringify(data));
+      aplicarLogin(data);
     }else{
-      erro("Usuário ou senha inválidos");
+      erro("Login inválido");
     }
-
-  } catch(e){
-    console.error(e);
+  }catch{
     erro("Erro ao conectar com servidor");
   }
 }
 
-/* restante do código permanece igual */
+function toggleCadastro(){
+  cadastroBox.style.display =
+    cadastroBox.style.display === "block" ? "none" : "block";
+}
+
+function aplicarLogin(user){
+  loginBox.style.display="none";
+  usuarioLogado.innerText = `👤 ${user.nome}`;
+}
+
+function logout(){
+  localStorage.removeItem("logado");
+  location.reload();
+}
+
+function erro(msg){
+  document.getElementById("erro").innerText = msg;
+}
+
 </script>
 
 </body>
